@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>AI会抢你的饭碗吗？职业安全指数测试</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "AI会抢你的饭碗吗？职业安全指数测试", "subtitle": "20道题测出你在AI时代的职业安全等级", "description": "AI浪潮来袭，你的工作还安全吗？通过任务重复性、人际交互需求、创意需求和不可替代性四个维度，科学评估你的职业在AI时代的真实安全指数。5种结果类型，附赠90天转型/提升计划。", "keywords": "AI,职业安全,职业规划,职业测试,人工智能,职业转型,职业风险,小红书测试", "primaryColor": "#d4784a", "ogImage": ""}, "home": {"title": "AI会抢你的饭碗吗？", "subtitle": "职业安全指数测试", "introHTML": "<p>2024年，ChatGPT横空出世，Midjourney让设计师颤抖，Sora让视频从业者失眠。</p><p>有人说AI是洪水猛兽，有人说AI是得力助手。<strong>你的职业到底安不安全？</strong></p><p>本测试从<em>任务重复性、人际交互需求、创意需求、不可替代性</em>四个维度，帮你定位自己在AI时代的真实位置。</p><p>20道题，5种结果类型，附带详细诊断和90天行动计划。</p>", "btnText": "开始测试", "disclaimer": "本测试仅供娱乐参考，职业规划请结合实际情况咨询专业人士。"}, "dimensions": [{"name": "任务重复性", "icon": "🔄", "questionIds": [1, 2, 3, 4, 5]}, {"name": "人际交互需求", "icon": "💬", "questionIds": [6, 7, 8, 9, 10]}, {"name": "创意需求", "icon": "🎨", "questionIds": [11, 12, 13, 14, 15]}, {"name": "不可替代性", "icon": "🛡️", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "你每天的工作中，有多大比例是在做重复性的、有固定流程的事情？", "options": [{"key": "A", "text": "90%以上，每天就是按部就班，闭着眼都能干完"}, {"key": "B", "text": "70%左右，大部分有套路，偶尔需要灵活处理"}, {"key": "C", "text": "50%左右，一半流程化，一半需要随机应变"}, {"key": "D", "text": "30%左右，工作内容经常变化，需要持续学习新东西"}, {"key": "E", "text": "10%以下，每天都在创造新事物，基本没有重复"}]}, {"id": 2, "text": "如果你的工作流程被写成一本操作手册，一个新人拿着它能在多快上手？", "options": [{"key": "A", "text": "一周以内，照着手册做就行，毫无门槛"}, {"key": "B", "text": "一个月左右，大部分有章可循，少数需要经验判断"}, {"key": "C", "text": "三个月，需要一定的专业积累和临场应变"}, {"key": "D", "text": "半年以上，涉及大量隐性知识和跨领域整合"}, {"key": "E", "text": "根本写不出来，我的工作本质是探索未知"}]}, {"id": 3, "text": "你工作中需要处理的信息，结构化程度如何？", "options": [{"key": "A", "text": "高度结构化，就是填表、对账、录入这些标准操作"}, {"key": "B", "text": "比较结构化，虽然有模板但偶尔需要自己判断归类"}, {"key": "C", "text": "半结构化，一半有章可循，一半需要自己梳理"}, {"key": "D", "text": "偏非结构化，经常要从混乱中提炼出规律"}, {"key": "E", "text": "完全非结构化，每天都在面对从未见过的新问题"}]}, {"id": 4, "text": "你上一次在工作中学到一个全新的技能或工具，是什么时候？", "options": [{"key": "A", "text": "三年前学的东西用到现在，工作内容几乎没有变化"}, {"key": "B", "text": "一年前学了点新东西，但核心技能基本没变"}, {"key": "C", "text": "半年内学过，行业在变我也不得不跟上"}, {"key": "D", "text": "上个月刚学了一个新工具，我已经习惯持续更新技能库了"}, {"key": "E", "text": "我每周都在学新东西，甚至我自己就是创造新工具的那个人"}]}, {"id": 5, "text": "如果你的工作被一个AI系统取代，大概需要多长时间？", "options": [{"key": "A", "text": "现在就可以，我做的很多事ChatGPT加个脚本就能搞定"}, {"key": "B", "text": "1-2年内，技术已经在路上了，就看成本什么时候降下来"}, {"key": "C", "text": "5年左右，还需要不少技术突破和法规配套"}, {"key": "D", "text": "10年以上，AI能辅助但没法完全替代我的判断和决策"}, {"key": "E", "text": "根本取代不了，我的价值恰恰在于定义AI做不到的事情"}]}, {"id": 6, "text": "你工作中面对面沟通和深度交流的占比有多大？", "options": [{"key": "A", "text": "几乎为零，我一个人对着电脑就能完成所有工作"}, {"key": "B", "text": "偶尔开会或对接，但大部分时间独立作业"}, {"key": "C", "text": "每天都有团队协作和客户沟通，人际互动是工作重要组成部分"}, {"key": "D", "text": "大量的沟通、谈判、协调，我的核心价值就是连接人和人"}, {"key": "E", "text": "我不仅大量沟通，我还在设计人与AI的协作方式"}]}, {"id": 7, "text": "你工作的成果，多大程度上依赖「对人性的理解」？", "options": [{"key": "A", "text": "基本不涉及，数据对就是对错就是错"}, {"key": "B", "text": "偶尔需要考虑用户感受，但大部分是执行层面的工作"}, {"key": "C", "text": "经常需要揣摩他人需求，同理心是必备技能"}, {"key": "D", "text": "核心就是理解人——用户心理、客户痛点、团队情绪"}, {"key": "E", "text": "我不仅理解人，还在思考如何让AI更好地理解人"}]}, {"id": 8, "text": "如果让你一周不和任何同事说一句话，只通过文字异步沟通，你能接受吗？", "options": [{"key": "A", "text": "太完美了，我本来就讨厌被打扰，文字沟通效率最高"}, {"key": "B", "text": "可以接受，偶尔开会也行，但文字沟通够用了"}, {"key": "C", "text": "不太行，有些事必须当面聊才能说清楚"}, {"key": "D", "text": "完全不行，我的工作本质就是和人建立信任和关系"}, {"key": "E", "text": "我在设计混合协作模式，人和AI各司其职才是未来"}]}, {"id": 9, "text": "在你的工作中，「共情能力」有多重要？", "options": [{"key": "A", "text": "不重要，把事情做对就行，不需要理解他人感受"}, {"key": "B", "text": "有点用但不是核心，专业能力更重要"}, {"key": "C", "text": "挺重要的，理解对方需求才能把活干漂亮"}, {"key": "D", "text": "极其重要，共情是我的核心竞争力，AI做不到这个"}, {"key": "E", "text": "我在研究如何将共情融入AI产品设计"}]}, {"id": 10, "text": "你最享受的工作状态是？", "options": [{"key": "A", "text": "一个人安静地完成任务清单，效率拉满"}, {"key": "B", "text": "大部分时间独立干活，偶尔和靠谱的同事碰一下"}, {"key": "C", "text": "和团队一起脑暴解决问题，碰撞出火花的时刻最爽"}, {"key": "D", "text": "站在台上分享观点、影响他人、建立连接的时候"}, {"key": "E", "text": "带领跨领域团队，把AI技术和人类智慧融合起来做产品"}]}, {"id": 11, "text": "你的工作中有多少成分是「从0到1的创造」？", "options": [{"key": "A", "text": "几乎没有，我执行的是别人已经设计好的流程"}, {"key": "B", "text": "偶尔需要在既定框架内做一些小改进"}, {"key": "C", "text": "经常需要设计方案、构思策略，有相当的创意空间"}, {"key": "D", "text": "创意是我的日常，我每天都在产出原创的想法和内容"}, {"key": "E", "text": "我不仅自己创造，还在设计让AI辅助创造的工具和流程"}]}, {"id": 12, "text": "AI生成的文案/设计/代码，你能一眼看出哪里「不对味」吗？", "options": [{"key": "A", "text": "看不出来，AI产出的东西我觉得已经很好了"}, {"key": "B", "text": "偶尔能感觉到不太对，但说不上来具体哪里有问题"}, {"key": "C", "text": "经常能发现AI欠缺的那股「人味儿」"}, {"key": "D", "text": "不仅能看出问题，还能清晰指出并指导修改方向"}, {"key": "E", "text": "我在训练AI理解什么是「好」，优化它的输出质量"}]}, {"id": 13, "text": "面对一个没有标准答案的开放式问题，你的第一反应是？", "options": [{"key": "A", "text": "很焦虑，我习惯有明确的步骤和参考答案"}, {"key": "B", "text": "先找找有没有类似的案例可以参考"}, {"key": "C", "text": "有点兴奋，开始从不同角度拆解和思考"}, {"key": "D", "text": "这才是最有意思的部分，我的价值就在解决这种问题"}, {"key": "E", "text": "先想想AI能不能辅助，再想想人机结合怎么做到最优"}]}, {"id": 14, "text": "你工作中需要做出「审美判断」的时刻多吗？（比如这个设计好不好看、这句话好不好听）", "options": [{"key": "A", "text": "几乎不需要，好坏有明确的数据指标"}, {"key": "B", "text": "偶尔需要，但大部分时候有客观标准"}, {"key": "C", "text": "经常需要做主观判断，品位和感觉很重要"}, {"key": "D", "text": "我的核心竞争力就是审美和品位，这是我不可替代的部分"}, {"key": "E", "text": "我在尝试让AI也学会审美，建立可量化的美学标准"}]}, {"id": 15, "text": "如果一个AI工具能帮你完成80%的日常工作，剩下的20%你会用来做什么？", "options": [{"key": "A", "text": "不知道该干什么，可能老板也不需要我了……"}, {"key": "B", "text": "花更多时间检查AI的输出质量，确保不出错"}, {"key": "C", "text": "把精力集中在需要深度思考和人际沟通的事情上"}, {"key": "D", "text": "用AI放大我的创意产出，做更多更有野心的项目"}, {"key": "E", "text": "去研究如何让AI工具变得更好，把省下的时间用来创新"}]}, {"id": 16, "text": "你的专业知识和经验，在行业里有多「稀缺」？", "options": [{"key": "A", "text": "完全不稀缺，招个应届生培训两周就能上岗"}, {"key": "B", "text": "有一定门槛但不高，同行很多，替代性强"}, {"key": "C", "text": "需要多年积累才能达到我现在的水平，有护城河"}, {"key": "D", "text": "我的经验组合非常独特，跨领域的知识结构很难复制"}, {"key": "E", "text": "我在定义一个全新的领域，暂时没有其他人能做我的工作"}]}, {"id": 17, "text": "如果你的行业明天突然消失了，你能在多快把能力迁移到另一个行业？", "options": [{"key": "A", "text": "不知道能做什么，我的技能太专太窄了"}, {"key": "B", "text": "可能需要一年重新学习，同行业的其他岗位还能试试"}, {"key": "C", "text": "半年内可以切换，我的底层能力是可以迁移的"}, {"key": "D", "text": "问题不大，我已经跨界过好几次了，适应力是我的强项"}, {"key": "E", "text": "我在创造新行业，不存在行业消失的问题"}]}, {"id": 18, "text": "你做出的判断和决策，多大程度上依赖「说不清的直觉」？", "options": [{"key": "A", "text": "完全不依赖直觉，一切按数据、规则和流程来"}, {"key": "B", "text": "偶尔凭感觉，但大部分决策有据可查"}, {"key": "C", "text": "经常需要综合经验和直觉做判断，数据只能提供参考"}, {"key": "D", "text": "我的核心价值就是那种「说不清但就是对的」的决策力"}, {"key": "E", "text": "我在尝试把直觉系统化，让隐性知识变得可传递"}]}, {"id": 19, "text": "你在工作中建立的「人际关系网络」，对你的职业安全有多大作用？", "options": [{"key": "A", "text": "没什么用，我的工作不需要关系网"}, {"key": "B", "text": "有一点用，但主要还是看硬实力"}, {"key": "C", "text": "挺重要的，很多机会和资源是通过人脉来的"}, {"key": "D", "text": "至关重要，我的职业护城河就是信任关系的积累"}, {"key": "E", "text": "我的人脉网络里包含顶尖AI专家和行业领袖，这本身就是壁垒"}]}, {"id": 20, "text": "说到AI和你的职业关系，下面哪句话最符合你的心态？", "options": [{"key": "A", "text": "我很焦虑，不知道哪天就被替代了，但又不知道该怎么办"}, {"key": "B", "text": "有点担心，但暂时还没找到明确的应对方向"}, {"key": "C", "text": "我相信只要持续提升自己的不可替代性，就不会被淘汰"}, {"key": "D", "text": "我不怕AI，我已经开始用它来放大自己的产出了"}, {"key": "E", "text": "AI是我的工具和赛道，我在思考如何用它创造新的价值"}]}], "resultTypes": {"A": {"name": "高危区", "subtitle": "你的职业正面临AI的正面冲击，亟需转型", "maturityScore": 30, "indices": [{"label": "自动化风险", "value": 90}, {"label": "转型紧迫度", "value": 88}, {"label": "技能可迁移性", "value": 25}], "diagnosis": "你的职业目前处于AI冲击的高危区域。你的工作具有高度的重复性和结构化特征，缺乏人际交互和创意需求，这些都是AI最擅长取代的领域。但这不是世界末日——历史上每一次技术革命都会淘汰一批岗位，同时创造一批新的机会。关键在于你是否愿意成为第一批转型的人。你现在最需要的不是恐慌，而是一份清晰的转型路线图。你的优势在于你对现有流程的熟悉，如果你能率先学会用AI工具改造你所在的行业，你将从「被替代者」变成「变革者」。", "radarData": [{"label": "任务重复性", "value": 95}, {"label": "人际交互", "value": 20}, {"label": "创意需求", "value": 15}, {"label": "不可替代性", "value": 10}, {"label": "学习敏捷性", "value": 25}], "suitableJobs": ["AI训练师/数据标注管理", "人机协作流程设计", "传统行业数字化转型顾问", "用户体验与服务质量优化"], "unsuitableJobs": ["纯数据录入与表单处理", "标准化客服（非复杂投诉处理）", "基础翻译与校对"], "pathCompare": {"good": "顺应AI趋势：主动学习AI工具，将重复性工作交给AI处理，自己转型为AI工作流的管理者和优化者，从「操作工」升级为「指挥官」。", "bad": "抗拒AI趋势：继续死守原有的工作方式，祈祷AI不会波及自己的领域，结果在1-2年内因效率劣势被淘汰。"}, "plan90": ["第1-30天：完成一项AI工具的系统学习（如ChatGPT进阶使用、自动化办公工具等），每天至少用AI辅助完成30%的工作任务，记录效率提升数据。同时开始探索行业内AI应用的现有案例。", "第31-60天：选择一个你熟悉的业务场景，用AI工具重新设计它的工作流程，形成一份「AI+你的行业」改进方案。主动向上级展示并提出承担相关试验项目的意愿。", "第61-90天：深耕一个AI无法替代的细分方向（如复杂沟通、异常处理、流程设计等），报名参加行业内的AI+职业转型培训或社群，建立你的转型人脉圈。"], "closing": "每一次技术革命都在淘汰旧岗位的同时创造了更高级的新职业——但前提是你愿意睁开眼睛，迈出第一步。", "posterText": "高危区——我正在学习与AI共舞", "posterSubtext": "加入我的90天职业转型挑战"}, "B": {"name": "转型区", "subtitle": "你的工作有一部分会被AI替代，但还有机会「加人味儿」", "maturityScore": 50, "indices": [{"label": "自动化风险", "value": 62}, {"label": "转型紧迫度", "value": 70}, {"label": "技能可迁移性", "value": 55}], "diagnosis": "你正处于职业安全的「灰色地带」。你的工作中有相当一部分是AI可以胜任的——那些规范化、流程化的环节。但好消息是，你还有很多需要人的判断、沟通和创造力的部分。这是最关键的转型窗口期。你不需要推倒重来，而是需要重新分配你的精力：把标准化的部分交给AI，把「人味儿」的部分做到极致。那些AI做不到的事情——建立信任、理解复杂情绪、做出模糊情境下的判断——才是你未来的护城河。", "radarData": [{"label": "任务重复性", "value": 70}, {"label": "人际交互", "value": 55}, {"label": "创意需求", "value": 45}, {"label": "不可替代性", "value": 40}, {"label": "学习敏捷性", "value": 50}], "suitableJobs": ["AI辅助下的专业服务（法律/财务/咨询）", "人机混合客服团队管理", "内容策划与AI协作创作", "行业解决方案设计"], "unsuitableJobs": ["纯执行类岗位（不涉及决策和改进）", "标准化程度极高的内容生产", "拒绝学习新工具的保守岗位"], "pathCompare": {"good": "主动转型：识别工作中AI可以替代的部分并主动拥抱AI工具，把释放出来的时间投入在人际沟通、策略思考和创意产出上，成为「AI增强型专业人才」。", "bad": "被动等待：继续用传统方式做所有事情，不愿意学习AI工具，结果发现自己的效率被会使用AI的同行甩开，逐渐边缘化。"}, "plan90": ["第1-30天：梳理你每周的工作时间分配，标记出哪些任务AI可以完成、哪些必须你来。选一个AI工具开始嵌入你的工作流（如用AI写初稿、做数据整理），目标是将重复性工作时间减少30%。", "第31-60天：聚焦你的「人味儿优势」——选择一项AI难以替代的能力进行刻意练习（如深度客户访谈、复杂谈判、创意策划等）。做一个案例对比：同一任务，全人工 vs AI辅助的效率和质量差异。", "第61-90天：输出一份「AI时代个人能力矩阵」——列出你的AI可替代技能和不可替代技能，制定未来一年的能力升级路径。在行业内分享你的转型心得，建立个人品牌。"], "closing": "AI不是来抢你饭碗的对手，而是来帮你搬砖的助手——你要做的不是和它比搬砖，而是学会当建筑师。", "posterText": "转型区——我正在打造AI时代的个人护城河", "posterSubtext": "看看我的职业安全指数报告"}, "C": {"name": "安全区", "subtitle": "你的职业拥有较强的「人本壁垒」，AI暂时难以撼动", "maturityScore": 75, "indices": [{"label": "自动化风险", "value": 25}, {"label": "转型紧迫度", "value": 35}, {"label": "技能可迁移性", "value": 75}], "diagnosis": "恭喜你，你的职业在AI时代拥有相当不错的安全边际。你的工作需要大量的人际互动、复杂情境判断和创造性思考——这些都是当前AI的短板。但请不要掉以轻心，「安全」不等于「免疫」。最聪明的人不是等AI变强了再应对，而是在安全的时候就学会使用AI这个工具。你的目标不是「不被替代」，而是「用好AI之后变得无可替代」。把AI当成你的超级助手，让你的专业能力如虎添翼。", "radarData": [{"label": "任务重复性", "value": 25}, {"label": "人际交互", "value": 85}, {"label": "创意需求", "value": 75}, {"label": "不可替代性", "value": 80}, {"label": "学习敏捷性", "value": 70}], "suitableJobs": ["高端咨询与策略顾问", "心理辅导与教练", "创意总监与品牌策划", "复杂项目管理"], "unsuitableJobs": ["纯技术执行类（过度降低人际交互）", "与AI正面竞争效率的岗位", "不需要发挥判断力的辅助性工作"], "pathCompare": {"good": "主动升级：在现有安全优势的基础上，积极拥抱AI工具作为辅助，用AI处理信息搜集和初步分析，把省下的时间用于更高价值的深度思考和关系构建上。", "bad": "固步自封：因为安全感十足而停止学习，拒绝使用任何AI工具，10年后发现自己的效率和信息获取能力严重落后于新一代从业者。"}, "plan90": ["第1-30天：评估AI在你行业中的应用现状，列出3个AI可以帮你提升效率的具体场景（如市场调研、会议纪要、数据分析等），开始实践并记录效果。", "第31-60天：将你的专业方法论与AI能力结合，打磨一套「人机协作服务流程」。例如，如果你是一名咨询师，可以让AI做背景研究，你专注于深度诊断和方案设计。", "第61-90天：在你的领域中建立一个个人IP，分享「AI时代XX行业的生存法则」，成为该领域AI应用的先行者和意见领袖。培养至少一名团队成员使用你的协作模式。"], "closing": "最好的防御是进攻——在AI还没有威胁到你的时候，先把它变成你最趁手的武器。", "posterText": "安全区——我不是不怕AI，是学会了和它做朋友", "posterSubtext": "我的职业安全指数报告请查收"}, "D": {"name": "放大器", "subtitle": "AI不会替代你，AI会让你十倍强大", "maturityScore": 88, "indices": [{"label": "自动化风险", "value": 10}, {"label": "转型紧迫度", "value": 20}, {"label": "技能可迁移性", "value": 85}], "diagnosis": "你是AI时代真正的受益者。你的工作本身就具有高度的创造性、策略性和人际复杂性，同时你又拥有足够的学习敏捷性和跨界能力。对你来说，AI不是威胁，而是放大器——它把那些消耗你时间的琐碎工作接过去，让你可以专注于只有你能做的高价值事务。你的画像很像那些用Midjourney把产出效率提升十倍的顶级设计师，或者用ChatGPT做研究辅助后产出翻倍的策略分析师。你的挑战不是生存，而是如何比别人更快更好地驾驭AI，把差距拉到最大。", "radarData": [{"label": "任务重复性", "value": 15}, {"label": "人际交互", "value": 80}, {"label": "创意需求", "value": 90}, {"label": "不可替代性", "value": 88}, {"label": "学习敏捷性", "value": 90}], "suitableJobs": ["AI时代的产品经理/策略总监", "跨界创新顾问", "创意科技融合型艺术家/设计师", "新商业模式的拓荒者"], "unsuitableJobs": ["按部就班的大公司螺丝钉岗位", "不需要发挥创造力的执行岗", "拒绝变化和创新的传统团队"], "pathCompare": {"good": "全力加速：把你已经验证的「AI增强工作流」系统化，形成方法论，并通过分享、教学或创业把它放大。你的领先优势就是你的护城河。", "bad": "独自享用：把AI辅助的方法藏起来自己用，不分享不传播，结果是失去了成为行业标杆和意见领袖的机会，最终被后来者赶超。"}, "plan90": ["第1-30天：整理你现有的「AI增强工作流」，形成一套系统化的方法论文档。尝试在一个新领域或新项目上应用这套方法，验证其可迁移性。", "第31-60天：主动在行业社群、小红书或公众号上分享你的AI协作方法论，打造个人IP。寻找2-3个志同道合的伙伴，尝试用AI工具协作完成一个超出个人能力边界的大项目。", "第61-90天：探索将你的方法论产品化的可能性——是否可以做成课程、工具包或咨询服务？制定一个将影响力放大的商业计划，从「个人强大」走向「系统强大」。"], "closing": "AI时代的赢家不是跑得最快的人，而是最会用工具的人——你已经在起跑线上领先了，现在要做的就是把优势变成胜势。", "posterText": "放大器——AI让我把梦想放大了十倍", "posterSubtext": "看看我是如何用AI开挂的"}, "E": {"name": "创造区", "subtitle": "你不是被AI影响的人，你是定义AI玩法的人", "maturityScore": 95, "indices": [{"label": "自动化风险", "value": 5}, {"label": "转型紧迫度", "value": 5}, {"label": "技能可迁移性", "value": 95}], "diagnosis": "你就是AI时代的原住民和创造者。你不仅不害怕AI，你很可能已经在使用、开发或研究AI工具了。你的思维模式天然适合这个时代——你擅长从零到一的创造，习惯在不确定性中找到方向，并且有极强的学习能力和跨界整合能力。对你来说，问题不是「AI会不会取代我」，而是「我如何用AI创造下一个大东西」。你是这个时代最稀缺的人才类型之一。你的挑战不是生存，而是选择——选择哪个方向去创造最大的价值。", "radarData": [{"label": "任务重复性", "value": 5}, {"label": "人际交互", "value": 75}, {"label": "创意需求", "value": 95}, {"label": "不可替代性", "value": 95}, {"label": "学习敏捷性", "value": 95}], "suitableJobs": ["AI产品创始人/创业者", "AI+行业解决方案架构师", "前沿科技研究员", "科技与人文交叉领域的开创者"], "unsuitableJobs": ["任何让你感到「被工具化」的工作", "缺乏自主权和创造空间的岗位", "只需要执行不需要思考的角色"], "pathCompare": {"good": "引领浪潮：找到一个AI技术与真实需求的最佳结合点，持续深耕，并建立跨领域的协作网络。你的价值在于「连接」——连接技术和人性、连接现在和未来。", "bad": "太过超前：过于沉迷技术本身，忽略了市场需求和用户感受，做出的产品或方案「很厉害但没人用」。"}, "plan90": ["第1-30天：梳理你目前在AI领域的核心能力栈，明确你的差异化定位——是技术实现、产品设计、行业应用还是人文关怀？选一个具体的场景，做出一个最小可行原型。", "第31-60天：将你的原型展示给至少20个真实用户，收集反馈并快速迭代。同时开始建立自己的AI领域内容输出（文章、视频或播客），建立行业影响力。", "第61-90天：寻找2-3个跨界合作伙伴（技术+行业+设计），将你的原型升级为一个更完整的解决方案。制定一份未来6个月的路线图——你是在现有框架内创业，还是选择加入一个前沿团队？"], "closing": "你不是在寻找风口，你就是风口本身。让世界看到你创造的东西。", "posterText": "创造区——我不是在找风口，我就是风口", "posterSubtext": "我正在用AI创造未来，一起吗？"}}, "loadingMessages": ["正在分析你的工作任务结构…", "正在识别重复性劳动占比…", "正在评估人际交互深度…", "正在测算创意需求指数…", "正在扫描行业AI替代率…", "正在生成职业安全报告…", "分析完成，请查收你的专属诊断。"], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "匹配度"}, "mixedNotes": {"A+B": "你的职业处于「高危-转型」交叉带。部分工作内容高度可自动化，但幸运的是你还有一定的人际交互基础。建议优先将重复性最高的部分用AI工具替代，把精力集中在提升沟通和判断能力上。", "A+C": "你在测试中给出的回答有些矛盾——部分指向高自动化风险，部分又显示较强的人际壁垒。这可能说明你对自身工作的定位还不够清晰，建议重新梳理你的核心价值点。", "A+D": "罕见的交叉组合。你可能在某些方面有很强的创造力，但同时承担了大量重复性工作。也许你是一个被琐事埋没的「放大器型」人才。试着把重复部分外包给AI工具，释放你的创造力。", "A+E": "有趣的矛盾。你可能对AI技术很有热情，但日常工作确实存在较高的自动化风险。这恰恰是转型的好机会——用你对AI的理解去改造你所在的行业。", "B+C": "你在转型区和安全区之间摇摆。你的职业有一定的安全基础，但部分工作习惯让你暴露在风险中。只要稍加调整，你就能稳稳地从「转型区」跨入「安全区」。", "B+D": "你是一个被低估的「AI放大器」。你已经有使用AI的意识和能力，但可能受限于当前的工作环境。试着在一个自由度更大的项目中展示你的AI增强能力。", "B+E": "你对AI的理解力很强，但目前的工作内容还没能完全释放你的创造潜力。建议主动寻找能将AI知识应用到你当前行业中的机会，成为「AI+行业」的桥梁型人才。", "C+D": "强强联合。你的职业安全感强，同时又擅长使用AI工具。你几乎是AI时代最理想的职业画像。保持现状并继续深耕，你的壁垒会越来越厚。", "C+E": "安全与创造的完美结合。你不仅拥有坚固的职业护城河，还具备定义未来的创造力。你的挑战只有一个——选择最让你兴奋的方向，然后全力以赴。", "D+E": "你是AI时代的「超级个体」。放大器和创造区的结合意味着你不仅能驾驭AI工具，还能创造新的工具和方法论。世界是你的舞台，尽情发挥。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

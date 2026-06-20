@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>你的搞钱基因是什么类型？</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "你的搞钱基因是什么类型？", "subtitle": "找到属于你的赚钱方式，比盲目搞钱更重要", "description": "同样在努力搞钱，为什么有人年入百万，有人原地踏步？搞钱也有基因——赚钱方式、资源运用、财富观念、执行力，四大维度精准定位你的搞钱类型，帮你找到专属于你的致富路径。", "keywords": "搞钱测试,财富密码,赚钱能力,副业,投资,自媒体,个人品牌,财富自由", "primaryColor": "#e8a840", "ogImage": ""}, "home": {"title": "你的搞钱基因是什么类型？", "subtitle": "找到属于你的赚钱方式，比盲目搞钱更重要", "introHTML": "<p>你有没有想过一个问题：<strong>明明大家都很努力，为什么搞钱的能力差这么多？</strong></p><p>有人靠投资实现财务自由，有人一门手艺走天下，有人靠流量年入千万，还有人穿梭于买卖双方之间闷声发财。</p><p>搞钱这件事，<strong>方法比努力重要一万倍</strong>。而找到适合你的方法，前提是先看清你的搞钱基因。</p><p>本测试从<strong>赚钱方式、资源运用、财富观念、执行力</strong>四个维度，帮你找到专属搞钱路径。测过的人都说：<em>「原来我走错了赛道！」</em></p>", "btnText": "开始测试", "disclaimer": "本测试仅供娱乐参考，投资有风险，搞钱需谨慎。测试结果不构成任何投资或职业建议。"}, "dimensions": [{"name": "赚钱方式", "icon": "💰", "questionIds": [1, 2, 3, 4, 5]}, {"name": "资源运用", "icon": "🔧", "questionIds": [6, 7, 8, 9, 10]}, {"name": "财富观念", "icon": "🧭", "questionIds": [11, 12, 13, 14, 15]}, {"name": "执行力", "icon": "⚡", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "想到「赚钱」两个字，你脑子里最先浮现的画面是？", "options": [{"key": "A", "text": "看着资产报表，钱在自动增值，躺着赚钱"}, {"key": "B", "text": "用自己独门手艺帮人解决难题，收到一笔可观的报酬"}, {"key": "C", "text": "很多人关注你、信任你，你推荐的东西他们都愿意买单"}, {"key": "D", "text": "撮合一笔生意，买家和卖家都满意，你从中获得佣金"}, {"key": "E", "text": "在大公司做到核心层，年薪加期权，稳稳地富有"}]}, {"id": 2, "text": "如果给你100万启动资金，你的第一反应是？", "options": [{"key": "A", "text": "分散投资到有潜力的标的，让时间和复利帮你赚钱"}, {"key": "B", "text": "花最好的资源提升自己，把一门技能磨到行业顶尖"}, {"key": "C", "text": "砸钱做内容、买流量、打造个人IP，有流量什么都能卖"}, {"key": "D", "text": "找一个供需不平衡的市场切入，低买高卖赚差价"}, {"key": "E", "text": "配置在安全资产里，继续在高薪岗位积累更多本金"}]}, {"id": 3, "text": "你认为一个人能赚大钱，最核心的原因是什么？", "options": [{"key": "A", "text": "认知和判断力——在正确的时间做正确的决策"}, {"key": "B", "text": "不可替代性——你能做别人做不了的事"}, {"key": "C", "text": "影响力——你能影响多少人，就能赚多少钱"}, {"key": "D", "text": "信息差——你知道别人不知道的，就能赚别人赚不到的"}, {"key": "E", "text": "位置和选择——坐到对的位子上，比什么都重要"}]}, {"id": 4, "text": "你最羡慕哪种人的赚钱方式？", "options": [{"key": "A", "text": "巴菲特式的——喝着可乐看着年报，钱就自己变多了"}, {"key": "B", "text": "顶级匠人式的——手艺越磨越精，身价越来越高"}, {"key": "C", "text": "头部主播/KOL式的——一场直播卖出一个亿"}, {"key": "D", "text": "隐形中间商式的——不生产不消费，光靠撮合就闷声发财"}, {"key": "E", "text": "大厂高管式的——年薪千万加股权，平台赋能个人"}]}, {"id": 5, "text": "如果让你从零开始重新搞钱，你的第一步会是什么？", "options": [{"key": "A", "text": "研究市场，找到被低估的机会和资产"}, {"key": "B", "text": "盘点自己已有的硬技能，找到能立刻变现的那一个"}, {"key": "C", "text": "立刻开始做内容，先积累1000个信任我的铁粉"}, {"key": "D", "text": "看看身边谁要卖什么、谁要买什么，从中发现套利空间"}, {"key": "E", "text": "找一家好公司先进去，爬到核心位置再说"}]}, {"id": 6, "text": "你如何看待「借钱」或「加杠杆」来做投资或创业？", "options": [{"key": "A", "text": "杠杆是财富加速器，但前提是算清楚风险收益比"}, {"key": "B", "text": "尽量不借钱，用自己的手艺慢慢积累最踏实"}, {"key": "C", "text": "只要有稳定的流量和变现模式，适当借钱扩张是聪明的"}, {"key": "D", "text": "中间生意看的是周转率，快进快出可以用杠杆"}, {"key": "E", "text": "坚决不借钱搞风险大的事，稳定收入的杠杆（房贷）是唯一例外"}]}, {"id": 7, "text": "你的人脉和社交圈，对你来说最大的价值是？", "options": [{"key": "A", "text": "获取一手信息和别人看不到的投资机会"}, {"key": "B", "text": "获得专业认可和高端客户的引荐"}, {"key": "C", "text": "扩大内容传播的范围和影响力"}, {"key": "D", "text": "发现不同圈子之间的供需匹配机会"}, {"key": "E", "text": "找到更好的职业机会和向上社交的通道"}]}, {"id": 8, "text": "你更愿意把钱花在什么地方？", "options": [{"key": "A", "text": "能增值的资产——股票、基金、房产、优质课程"}, {"key": "B", "text": "提升专业能力的投资——考证、进修、买最好的工具"}, {"key": "C", "text": "打造个人形象和品牌——拍摄设备、推广投放、形象升级"}, {"key": "D", "text": "建立和维护关键关系——商务社交、请客吃饭、礼品"}, {"key": "E", "text": "提升生活品质和安全感——好房子、好车、好的教育和医疗"}]}, {"id": 9, "text": "关于「时间」和「钱」的关系，你最认同哪句话？", "options": [{"key": "A", "text": "让钱为你工作，而不是你为钱工作——这是富人和穷人的分水岭"}, {"key": "B", "text": "你的单位时间价值决定了你的收入天花板——提高客单价才是正道"}, {"key": "C", "text": "一份时间如果能同时卖给一万人，那就是最好的商业模式"}, {"key": "D", "text": "信息差抓对一次，赚的钱可能比别人上班十年还多"}, {"key": "E", "text": "在关键岗位上，你的时间会因为平台而指数级增值"}]}, {"id": 10, "text": "一个搞钱项目前三个月都没有进账，你的心态是？", "options": [{"key": "A", "text": "只要底层逻辑对、趋势在，短期不赚钱可以接受"}, {"key": "B", "text": "会焦虑，还是希望能尽快看到回头钱"}, {"key": "C", "text": "只要流量在涨、信任在积累，变现是迟早的事"}, {"key": "D", "text": "中间商最怕资金链断裂，三个月没回款就得立刻调整"}, {"key": "E", "text": "没有稳定月薪的项目我不会碰——必须能看到清晰的回报时间线"}]}, {"id": 11, "text": "一个人从穷变富，你觉得改变命运最关键的因素是什么？", "options": [{"key": "A", "text": "认知升级——你永远赚不到你认知以外的钱"}, {"key": "B", "text": "技能壁垒——当你是某个领域的顶尖，钱会自己来找你"}, {"key": "C", "text": "流量加持——在互联网时代，注意力就是最稀缺的资源"}, {"key": "D", "text": "信息优势——你比别人早一步知道，就早一步赚到"}, {"key": "E", "text": "圈层跃迁——进入更高价值的网络，机会自然不一样"}]}, {"id": 12, "text": "当你赚到第一桶金（比如50万），你觉得最明智的下一步是什么？", "options": [{"key": "A", "text": "让钱流动起来，配置到能持续增值的资产里"}, {"key": "B", "text": "继续投资自己，升级技能、工具和人脉圈层"}, {"key": "C", "text": "扩大流量池，从1万粉做到10万粉，把人变成钱"}, {"key": "D", "text": "寻找下一个信息洼地，复制自己已经跑通的模式"}, {"key": "E", "text": "稳健投资+继续深耕主业，不急着改变已经验证有效的路径"}]}, {"id": 13, "text": "你对「副业」这件事的真实看法是？", "options": [{"key": "A", "text": "如果投资回报够高，副业不是必须的——钱生钱才是终极副业"}, {"key": "B", "text": "副业应该是主业的延伸，用同样的专业技能服务更多客户"}, {"key": "C", "text": "副业就是个人IP的孵化器，跑通了就能变成主业"}, {"key": "D", "text": "副业就是信息差的变现渠道，多一条路多一份安全感"}, {"key": "E", "text": "与其做副业分散精力，不如把主业做到极致——主业强的人不需要副业"}]}, {"id": 14, "text": "假设你一夜暴富之后，你最想做的事情是什么？", "options": [{"key": "A", "text": "做天使投资，发现和投资下一个改变世界的公司"}, {"key": "B", "text": "开一家自己的工作室/公司，做到细分领域第一名"}, {"key": "C", "text": "继续做大你的影响力，从网红变成真正的企业家"}, {"key": "D", "text": "做一个更大的撮合平台，让更多信息不对称变成真金白银"}, {"key": "E", "text": "买好资产保障安全，然后继续在热爱的岗位上发光发热"}]}, {"id": 15, "text": "你如何看待「认知」和「赚钱」之间的关系？", "options": [{"key": "A", "text": "赚钱本质上是认知的变现——你看不懂的钱永远赚不到"}, {"key": "B", "text": "认知很重要，但没有硬技能和交付能力，认知就是空中楼阁"}, {"key": "C", "text": "认知决定上限，但表达力和传播力决定你能不能到达上限"}, {"key": "D", "text": "信息差本身就是认知差——别人不知道你知道的就叫认知优势"}, {"key": "E", "text": "认知重要，但更重要的是在对的平台上的位置和话语权"}]}, {"id": 16, "text": "当你发现一个潜在的搞钱机会，从「知道」到「动手」通常要多久？", "options": [{"key": "A", "text": "先深度研究，确认逻辑成立就果断下手，绝不瞎投"}, {"key": "B", "text": "要充分准备，把每个环节都想清楚再行动"}, {"key": "C", "text": "越快越好，风口不等人，先干了再优化"}, {"key": "D", "text": "先试探性地问问身边人有没有兴趣，有反馈就立刻推进"}, {"key": "E", "text": "先评估和现有路径的兼容性，不能影响主业的基本盘"}]}, {"id": 17, "text": "一个搞钱计划做到一半，发现比预想的难了十倍，你会？", "options": [{"key": "A", "text": "重新评估投入产出比，不行就果断止损换方向"}, {"key": "B", "text": "咬牙死磕，把每个细节打磨到极致，用品质说话"}, {"key": "C", "text": "换一个角度重新包装，换个叙事方式再推一波"}, {"key": "D", "text": "找一个有经验的人合伙或者外包，专业的事交给专业的人"}, {"key": "E", "text": "评估是否值得继续，如果ROI太低就果断放弃回到主航道"}]}, {"id": 18, "text": "你的日常做事风格，最接近以下哪种描述？", "options": [{"key": "A", "text": "谋定而后动——想清楚再干，但一旦决定就毫不犹豫"}, {"key": "B", "text": "慢工出细活——不做到让自己满意不交货"}, {"key": "C", "text": "做了再说——在行动中收集反馈，快速调整方向"}, {"key": "D", "text": "看准了跟——有人跑通了我就上，不浪费时间去试错"}, {"key": "E", "text": "稳中求进——每一步都走得扎实，不求快但求稳"}]}, {"id": 19, "text": "面对一个很赚钱但完全不是你的领域的机会，你会？", "options": [{"key": "A", "text": "研究行业逻辑后投资该领域的优秀团队"}, {"key": "B", "text": "花时间系统学习，不掌握核心逻辑绝不出手"}, {"key": "C", "text": "用内容的视角切入，先吸引对这个领域感兴趣的人"}, {"key": "D", "text": "找到懂行的人合作，你负责对接资源和客户"}, {"key": "E", "text": "不是自己赛道的不碰——专注才是最大的红利"}]}, {"id": 20, "text": "你觉得大多数人赚不到理想收入，最根本的原因是？", "options": [{"key": "A", "text": "认知不够——看不懂机会，看懂了也不敢下重注"}, {"key": "B", "text": "能力不够硬——做的事随时可以被别人替代"}, {"key": "C", "text": "不懂展示自己——有本事但没人知道，酒香也怕巷子深"}, {"key": "D", "text": "圈子太窄——信息闭塞，连机会长什么样都不知道"}, {"key": "E", "text": "不敢在一条正确的路上持续积累——频繁换赛道，永远从头开始"}]}], "resultTypes": {"A": {"name": "📈 投资者型", "subtitle": "让钱生钱，是刻在你基因里的底层代码", "maturityScore": 87, "indices": [{"label": "投资嗅觉", "value": 91}, {"label": "资产思维", "value": 89}, {"label": "长期主义", "value": 88}], "diagnosis": "你骨子里有一种天生的资产思维——别人看到的是商品，你看到的是标的；别人想的是「花多少钱买」，你想的是「这笔投入能产出多少」。你对复利、ROI、资产配置这些概念有天生的敏感。你的搞钱路径不在于卖时间、卖体力，而在于识别被低估的价值、在正确的时机下注、然后让时间和复利为你工作。别人靠出卖时间赚钱，你靠让钱替你工作赚钱——这是完全不同的两个物种。但要小心：过度追求投资回报可能让你错失需要用「笨功夫」积累的机会，不是所有有价值的事都能用ROI衡量。", "radarData": [{"label": "投资思维", "value": 92}, {"label": "专业能力", "value": 78}, {"label": "流量意识", "value": 72}, {"label": "撮合能力", "value": 76}, {"label": "执行魄力", "value": 85}], "suitableJobs": ["专业投资人/基金经理", "个人投资者/天使投资人", "资产配置顾问", "财务自由实践者"], "unsuitableJobs": ["纯出卖时间的重复劳动", "高度依赖流量的网红路线", "没有复利积累的纯体力工作"], "pathCompare": {"good": "顺应天赋：先通过主业或创业积累第一桶金，同时持续学习投资知识。在有足够的本金和认知基础后，逐步加大投资比例，让钱生钱成为你的主要收入引擎。", "bad": "逆天赋：在本金不足的时候就All-in投资，或者过度依赖杠杆，一次黑天鹅事件就前功尽弃。又或者因为过度保守，永远不敢让钱真正为你工作。"}, "plan90": ["第1-30天：清点你目前的资产状况，计算出你的净资产、现金流和可用于投资的资金比例。阅读至少两本经典的投资书籍，建立自己的投资框架。", "第31-60天：选定1-2个你真正感兴趣的领域（股票/基金/房产等），深入学习分析方法。用不超过可用资金的20%做第一笔投资，实战是最好的老师。", "第61-90天：建立你的投资记录和复盘体系。每次决策后记录逻辑和情绪，定期复盘。开始构建多元化的资产配置方案，目标不是暴富而是持续增值。"], "closing": "真正的富有不是你赚了多少钱，而是你的资产在你不工作的时候能为你赚多少钱。你天生就是为这个目标而生的。", "posterText": "我是投资者型搞钱人格", "posterSubtext": "让钱生钱是我的本能，资产思维刻在我的基因里"}, "B": {"name": "🔧 手艺人型", "subtitle": "一门手艺走天下，越老越吃香的真功夫派", "maturityScore": 85, "indices": [{"label": "专业深度", "value": 91}, {"label": "匠人精神", "value": 89}, {"label": "交付品质", "value": 90}], "diagnosis": "你的搞钱基因里写着两个字：「硬核」。你不信一夜暴富的故事，不信流量泡沫，你只相信——把一件事做到极致，钱自然会来。你的优势在于：你能沉下心打磨一项别人学不来的技能，你能交付让客户拍案叫绝的品质。在这个充满浮躁的时代，你的「慢」反而是最快的路。手艺人的魅力是复利型的：三年看不出差距，五年开始拉大差距，十年后你和同行之间隔着一道不可跨越的护城河。但要警惕：只顾低头拉车、忘了抬头看路，再好的手艺也需要被看见。你需要学会展示自己的价值，让市场重新定价你的时间。", "radarData": [{"label": "投资思维", "value": 70}, {"label": "专业能力", "value": 94}, {"label": "流量意识", "value": 65}, {"label": "撮合能力", "value": 73}, {"label": "执行魄力", "value": 82}], "suitableJobs": ["自由职业者/独立顾问", "高端技术专家/架构师", "专业领域培训师", "定制化服务提供者"], "unsuitableJobs": ["纯炒作型网红", "投机型短线交易", "靠信息差吃饭的中间商"], "pathCompare": {"good": "顺应天赋：选定一个细分领域深耕到底，把你的专业能力产品化（课程/咨询/服务），逐步提高客单价，从卖时间到卖解决方案。建立个人品牌让技能被更多人看见。", "bad": "逆天赋：频繁换赛道、学什么都是三分钟热度，每一项都懂一点但每一项都不够硬，最终还在和刚入行的年轻人卷价格。或者死守手艺却拒绝展示和营销，酒香也怕巷子深。"}, "plan90": ["第1-30天：明确你的核心技能在市场上的定位——你能帮谁解决什么具体问题？他们愿意为此付多少钱？把你的技能梳理成一个清晰的服务产品。", "第31-60天：在各种渠道找到前3-5个付费客户，用超预期的交付积累口碑和案例。开始建立你的作品集和专业社交媒体形象。", "第61-90天：优化你的定价策略——从按时收费转向按价值收费。探索被动收入的可能（模板、课程、知识付费），让你的技能脱离你本人也能部分变现。"], "closing": "在这个快节奏的时代，慢下来把一件事做到极致，本身就是一种稀缺的能力。你的手艺，就是你在任何经济周期里都最硬的底牌。", "posterText": "我是手艺人型搞钱人格", "posterSubtext": "不靠投机不靠炒作，一门硬功夫吃遍天下"}, "C": {"name": "📣 流量型", "subtitle": "注意力在哪里钱就在哪里，你是天生的流量捕手", "maturityScore": 84, "indices": [{"label": "内容力", "value": 90}, {"label": "网感敏锐度", "value": 92}, {"label": "变现意识", "value": 85}], "diagnosis": "你是互联网时代的原住民搞钱玩家。你天然理解一个道理：在这个时代，影响力就是货币。你有强烈的表达欲、有对大众情绪的敏锐嗅觉、有把复杂事情讲得有趣的能力。你适合的搞钱路径不是闷头做事，而是让更多人看见你、信任你、跟随你。流量的尽头是交易——只要你有足够多的人信任你，卖什么都能赚钱。你最大的资产不是某个具体技能，而是「被信任的能力」。但要记住：流量不等于留量，信任一旦透支就再也回不来。流量型选手最难的不是爆红，而是长红——持续提供价值的能力，才是你的核心护城河。", "radarData": [{"label": "投资思维", "value": 68}, {"label": "专业能力", "value": 72}, {"label": "流量意识", "value": 94}, {"label": "撮合能力", "value": 80}, {"label": "执行魄力", "value": 88}], "suitableJobs": ["自媒体博主/KOL", "直播主播/带货达人", "内容创业者", "个人IP打造者"], "unsuitableJobs": ["完全幕后的技术岗", "无需与人沟通的独立工作", "高度流程化的重复劳动"], "pathCompare": {"good": "顺应天赋：选准一个垂直领域深耕内容，持续输出价值建立信任。当粉丝对你个人的信任超过对品牌的信任时，你的变现能力将指数级增长。", "bad": "逆天赋：什么火追什么，今天做美妆明天做财经后天做搞笑，粉丝画像混乱、信任感薄弱，永远在追逐流量却从未真正变现。或者为了流量突破底线，信任崩塌只需一瞬间。"}, "plan90": ["第1-30天：确定你的内容定位——你是谁？你服务谁？你能持续提供什么价值？选定一个主平台，每天稳定输出1-2条高质量内容。", "第31-60天：积累你的前1000个铁粉。持续优化内容质量和表达方式，找到你独特的风格。建立内容SOP，保证稳定输出。", "第61-90天：设计你的第一个变现产品（咨询/课程/带货/广告）。让第一批愿意为你付费的粉丝告诉你什么最值钱。不要等到粉丝多了再变现——变现本身也是建立信任的方式。"], "closing": "在这个注意力经济的时代，能持续被人关注和信任是一种了不起的能力。用好你的表达力，让你的声音成为你的资产。真诚才是最好的流量密码。", "posterText": "我是流量型搞钱人格", "posterSubtext": "注意力在哪里钱就在哪里，我的影响力就是我的印钞机"}, "D": {"name": "🔗 中间商型", "subtitle": "信息差猎人，你的撮合能力就是印钞机", "maturityScore": 83, "indices": [{"label": "信息嗅觉", "value": 91}, {"label": "撮合能力", "value": 90}, {"label": "人脉广度", "value": 89}], "diagnosis": "你有一种特殊的天赋：总能发现A需要什么、B有什么——然后把它们完美地撮合在一起。你不需要自己做产品、不需要自己搞技术、甚至不需要自己做流量，你只需要在信息不对称中充当桥梁，就能创造价值并从中获利。从古代的丝绸之路商人到今天的各种「对接人」「资源方」，你这种搞钱基因已经存在了千年。你是「看见价值」的人——不是创造价值，而是发现被错配的价值，然后重新匹配。但要记住：中间商的价值在于信任和信息优势，失去了任何一项，你的位置就会被取代。信息越来越透明的时代，你能提供的必须不止是「牵线」，而是「信任背书」和「交易保障」。", "radarData": [{"label": "投资思维", "value": 74}, {"label": "专业能力", "value": 70}, {"label": "流量意识", "value": 76}, {"label": "撮合能力", "value": 94}, {"label": "执行魄力", "value": 84}], "suitableJobs": ["商务/渠道拓展", "资源对接型创业者", "供应链贸易商", "项目掮客/中间人"], "unsuitableJobs": ["需要深度专注的单人工作", "信息完全透明的充分竞争市场", "纯技术研发岗"], "pathCompare": {"good": "顺应天赋：深耕一个信息不对称明显的行业，建立买卖双方的深度信任，做那个「别人搞不定的对接你能搞定」的超级节点。把撮合变成可复制的系统和品牌。", "bad": "逆天赋：什么资源都想对接、什么钱都想赚，结果每一个领域都浮在表面，没有建立起真正的信任壁垒，沦为可被替代的传话筒。"}, "plan90": ["第1-30天：选定一个有信息壁垒的细分行业，梳理出供给端和需求端的关键人物清单。每周至少和3个行业关键人深度交流，弄清楚他们真正的痛点和需求。", "第31-60天：促成你的第一笔撮合交易，哪怕金额不大，先跑通「发现需求-匹配资源-促成交易」的闭环。总结这次交易的关键成功因素。", "第61-90天：建立你的撮合系统——标准化你的信息收集、匹配和交易流程。开始积累行业口碑，让更多人主动来找你对接。"], "closing": "这个世界上最赚钱的生意从来不是生产，而是连接。你天然具有这种「看见双方需求」的能力。善用它，你就是那个闷声发大财的人。", "posterText": "我是中间商型搞钱人格", "posterSubtext": "信息就是金钱，撮合就是价值，我是天生的连接者"}, "E": {"name": "👑 打工皇帝型", "subtitle": "把工打明白了，年薪百万也是人生赢家", "maturityScore": 86, "indices": [{"label": "职场智慧", "value": 91}, {"label": "向上管理", "value": 88}, {"label": "晋升策略", "value": 89}], "diagnosis": "在这个「人均副业」「全民创业」的时代，你难得地保持清醒——你知道，把班上好、把级别做高、把薪资拉满，也是一种顶级搞钱能力。你不是没有创业的冲动，而是你清楚地算过账：在现有的职业轨道上，你的ROI比大部分创业者都要高。你擅长向上管理、懂得抢占关键位置、知道如何让付出被看见。你不是「只能打工」，而是「选择打工」——这可是完全不同的两件事。真正的高手在组织里也能拿到创业级别的回报。打工皇帝的本质是：用平台的资源为自己的简历打工，把公司的资产变成自己的资产。但要保持警觉：平台能给你的，平台也能拿走——永远保有离开平台依然值钱的能力。", "radarData": [{"label": "投资思维", "value": 78}, {"label": "专业能力", "value": 86}, {"label": "流量意识", "value": 74}, {"label": "撮合能力", "value": 83}, {"label": "执行魄力", "value": 82}], "suitableJobs": ["大厂高管/VP", "顶尖专业服务人士（投行/咨询/律所）", "核心业务负责人", "公司内部创业者"], "unsuitableJobs": ["收入高度不确定的创业", "完全依赖个人IP的自由职业", "没有上升通道的螺丝钉岗位"], "pathCompare": {"good": "顺应天赋：在优质平台深耕一个核心业务方向，建立你的不可替代性和内部话语权，用平台资源放大个人价值。把平台的每一次变动都视为自己升级的机会。", "bad": "逆天赋：在多个公司之间反复横跳追求短期涨薪，没有在一个地方建立深厚的积累和人脉根基。30岁后发现自己的性价比不如刚毕业的年轻人。"}, "plan90": ["第1-30天：盘点你目前岗位的核心价值——你为公司贡献了什么不可替代的能力？主动向上沟通你的职业规划，明确下一个晋升里程碑需要的关键条件。", "第31-60天：争取一个能提升你公司内部可见度和影响力的项目。建立跨部门的关键人脉，让你的价值被更多人看到。", "第61-90天：梳理你的行业竞争力——如果明天离开这个平台，你的行业口碑和人脉能带给你什么？开始有意识地建立行业影响力（演讲/文章/行业社群）。"], "closing": "创业不是搞钱的唯一答案。真正的职场高手，能把打工变成一件回报率极高的事情。在属于你的赛道上闷声做大事，年薪百万加期权，同样是闪闪发光的人生。", "posterText": "我是打工皇帝型搞钱人格", "posterSubtext": "不打没有回报的工，我的职场之路就是最好的投资标的"}}, "loadingMessages": ["正在扫描你的搞钱基因...", "分析你的赚钱偏好中...", "评估你的资源运用模式...", "检测你的财富观念...", "校准你的执行力...", "匹配最优搞钱路径...", "生成专属搞钱报告..."], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "匹配度"}, "mixedNotes": {"A+B": "你既有投资思维又有手艺人的专注，最理想的路径是用专业技能积累第一桶金，然后逐步转向资产配置，实现两条腿走路。你的技能保底，你的投资增值，完美对冲风险。", "A+C": "投资思维+流量能力，你是天生的「知识付费型KOL」。用内容建立信任，用投资眼光提供价值，是最高级的变现方式。你的粉丝不只是观众，更是你的资产。", "A+D": "投资嗅觉+撮合天赋，你适合做「信息套利型投资」——发现市场定价错误的机会，用你的人脉和信息网络比别人快一步。你看到的不是交易机会，而是价值洼地。", "A+E": "投资思维+职场高手，你最适合「高薪+理财」的稳健路线。主业提供现金流和本金，投资让钱生钱，两条腿稳稳走向财务自由。", "B+C": "手艺+流量是最强组合。用你的专业内容吸引粉丝，再把粉丝转化为你的高端客户。你知道的——最好的流量就是专业价值的外溢。你的作品就是最好的广告。", "B+D": "手艺+撮合能力，你可以做一个「高端服务对接人」——你懂技术又懂需求，在有信息壁垒的专业服务领域做撮合，价值巨大。", "B+E": "手艺+职场智慧，你可以走「专业路线管理层」——用硬核技能进入核心位置，再用管理能力放大影响力，两边优势都吃到了。", "C+D": "流量+撮合能力，你是天生的「直播带货」或「社群电商」选手——用流量获取注意力，用撮合能力对接供应链，中间吃差价。", "C+E": "流量思维+职场高手，你适合「公司内部KOL」路线——在组织内建立个人品牌和影响力，用职场话语权放大你的想法，成为不可替代的关键人物。", "D+E": "撮合能力+职场智慧，你适合「平台型岗位」——商务拓展、战略合作、投资并购等。用组织的资源和人脉做撮合，你的价值就是组织价值。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

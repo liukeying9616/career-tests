@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>测测你的社交人格在第几层？</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "测测你的社交人格在第几层？", "subtitle": "5层社交人格画像，揭露你最真实的社交模式", "description": "你在人群中是充电还是耗电？你是天生的连接者还是享受独处的观察者？通过20道趣味测试题，精准定位你的社交人格层级，发现你独特的社交天赋与舒适区。社恐不是病，社牛不是标准答案——找到属于你的社交节奏，就是最好的生活方式。", "keywords": "社交人格测试,社恐,社牛,内向,外向,社交层级,人格画像,小红书测试", "primaryColor": "#d4784a", "ogImage": ""}, "home": {"title": "测测你的社交人格在第几层？", "subtitle": "5层社交人格画像，找到你的专属社交节奏", "introHTML": "<p>你有没有这样的困惑：为什么有些人在人群里越聊越嗨，而你只想回家躺着？为什么你可以跟陌生人聊得很开心，却对深度亲密感到抗拒？</p><p>每个人都有自己的<strong>社交人格层级</strong>——它不是对错之分，而是你与世界连接的方式。有人是社恐保护层，需要安全的小圈子；有人是社交变色龙，能在任何场合自如切换；有人天生就是社交领袖，走到哪里都自带光芒。</p><p>20道直击灵魂的测试题，帮你精准定位自己的社交人格在第几层。没有标准答案，只有最适合你的社交节奏。</p>", "btnText": "开始测试", "disclaimer": "本测试仅供娱乐参考，每个人的社交模式都是独特的，请勿以此作为自我标签化的唯一依据。"}, "dimensions": [{"name": "社交能量", "icon": "⚡", "questionIds": [1, 2, 3, 4, 5]}, {"name": "社交策略", "icon": "🎯", "questionIds": [6, 7, 8, 9, 10]}, {"name": "共情能力", "icon": "💙", "questionIds": [11, 12, 13, 14, 15]}, {"name": "边界意识", "icon": "🛡️", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "周末晚上收到朋友聚会的邀请，你的第一反应是？", "options": [{"key": "A", "text": "内心默默祈祷有人取消，在家独处才是最舒服的"}, {"key": "B", "text": "先看看都有谁去，熟人够多才考虑出门"}, {"key": "C", "text": "去吧，到了现场可以根据氛围调整自己的状态"}, {"key": "D", "text": "太好了！正好最近想多认识一些人，拓展一下朋友圈"}, {"key": "E", "text": "必须去！正好有个想法想跟大家分享，我来负责攒局"}]}, {"id": 2, "text": "在人多的场合待了几个小时之后，你通常是什么状态？", "options": [{"key": "A", "text": "精疲力尽，只想立刻回家瘫着，一句话都不想说"}, {"key": "B", "text": "互动质量高的话还行，尬聊太多就会提前找理由离开"}, {"key": "C", "text": "还行，切换一下社交模式感觉自己能适应大多数场合"}, {"key": "D", "text": "越聊越兴奋，感觉认识新朋友是一件很充实的事"}, {"key": "E", "text": "意犹未尽！结束后还想拉着核心几个人换个地方继续聊"}]}, {"id": 3, "text": "遇到一个刚认识的人，你通常会怎么做？", "options": [{"key": "A", "text": "礼貌微笑，尽量不主动开启话题，等对方先说话"}, {"key": "B", "text": "简单寒暄几句，观察一下对方是否值得深入交流"}, {"key": "C", "text": "根据对方的气质和状态，灵活调整自己的聊天风格"}, {"key": "D", "text": "主动介绍自己，看看有没有可以互相帮忙或合作的地方"}, {"key": "E", "text": "自然地主导对话节奏，让对方感觉被关注和欢迎"}]}, {"id": 4, "text": "别人眼中的你，最接近下面哪一种描述？", "options": [{"key": "A", "text": "文静、慢热，熟了之后才会慢慢展示真实的自己"}, {"key": "B", "text": "看起来友善但有点距离感，只跟特定的人走得近"}, {"key": "C", "text": "跟谁都能聊得来，让人觉得很好相处、没有架子"}, {"key": "D", "text": "人脉很广，好像认识很多人，总能帮人牵线搭桥"}, {"key": "E", "text": "走到哪里都不自觉地成为焦点，说话有分量，大家愿意听你的"}]}, {"id": 5, "text": "下面哪句话最接近你对社交这件事的内心独白？", "options": [{"key": "A", "text": "社交真的好累，如果可以，我想永远待在自己的小世界里"}, {"key": "B", "text": "我不想跟所有人都做朋友，有几个真正懂我的人就够了"}, {"key": "C", "text": "社交是一种技能，我可以根据不同的场合切换不同的模式"}, {"key": "D", "text": "人与人之间的连接是美好的，我想成为那个搭建桥梁的人"}, {"key": "E", "text": "我喜欢把人聚在一起的感觉，让每个人都能找到自己的归属"}]}, {"id": 6, "text": "参加一个几乎全是陌生人的大型活动，你的策略是什么？", "options": [{"key": "A", "text": "找个角落待着，玩手机等结束，或者提前悄悄溜走"}, {"key": "B", "text": "先观察一圈，锁定一两个看起来气场相合的人深入聊"}, {"key": "C", "text": "快速扫描全场氛围，调整成最适合这个场合的社交状态"}, {"key": "D", "text": "主动寻找连接点，看看谁和谁可以互相认识、互相帮助"}, {"key": "E", "text": "直接找到主办方或核心人物，自然地融入并引导话题"}]}, {"id": 7, "text": "当你需要通过社交来达成某个目标时，你的做法是？", "options": [{"key": "A", "text": "能不做就不做，先看看有没有不需要社交也能完成的方法"}, {"key": "B", "text": "有选择地接触少数几个真正相关的人，深耕关系而非广撒网"}, {"key": "C", "text": "准备几套不同的交流风格，根据对象灵活切换和调整"}, {"key": "D", "text": "列一个人脉清单，系统性地逐个联系、建立连接和跟进"}, {"key": "E", "text": "组织一次分享会或饭局，让想认识的人反过来主动来找你"}]}, {"id": 8, "text": "遇到一个对你态度冷淡甚至不太友好的人，你通常会？", "options": [{"key": "A", "text": "有点受伤，默默远离，之后尽量避免跟这个人再有接触"}, {"key": "B", "text": "不勉强，我也不是对每个人都热情，随缘就好"}, {"key": "C", "text": "试着换一种交流方式，看看能不能化解对方的防备心"}, {"key": "D", "text": "通过共同认识的人侧面了解一下情况，看看是不是有什么误会"}, {"key": "E", "text": "直接大方地正面沟通，用真诚和自信化解尴尬"}]}, {"id": 9, "text": "在团队协作中，你更喜欢扮演哪种角色？", "options": [{"key": "A", "text": "默默做好自己分内的事，不太参与过多的讨论和发言"}, {"key": "B", "text": "跟自己信任的一两个搭档深度配合，其他人保持适当距离"}, {"key": "C", "text": "根据项目的需要灵活调整，哪里需要补位就去哪里"}, {"key": "D", "text": "负责协调各方、确保信息流畅、每个人都不掉队"}, {"key": "E", "text": "自然地承担起领头人的角色，统筹全局、鼓舞士气"}]}, {"id": 10, "text": "跟朋友之间闹了矛盾，你的处理方式更接近哪种？", "options": [{"key": "A", "text": "先冷处理，自己慢慢消化情绪，可能需要较长时间才能恢复"}, {"key": "B", "text": "衡量这段关系的价值，只有值得挽留的才会主动去沟通"}, {"key": "C", "text": "调整沟通策略，找一个双方都能接受的方式来化解矛盾"}, {"key": "D", "text": "主动搭建沟通的桥梁，必要时找共同朋友帮忙调解"}, {"key": "E", "text": "直面问题，带头把话说开，不让误会和情绪过夜"}]}, {"id": 11, "text": "你对周围人情绪变化的敏感度有多高？", "options": [{"key": "A", "text": "说实话不太敏感，有时候别人不高兴了我都没注意到"}, {"key": "B", "text": "亲近的人能感觉到，不太熟的人就不太关注他们的状态"}, {"key": "C", "text": "比较敏感，能很快捕捉到气氛和情绪的微妙变化"}, {"key": "D", "text": "很擅长读懂他人的情绪，这是建立深度连接的关键能力"}, {"key": "E", "text": "不仅能敏锐察觉，还能主动引导和调整整个群体的情绪走向"}]}, {"id": 12, "text": "好朋友突然在你面前崩溃大哭，你的反应是？", "options": [{"key": "A", "text": "有点手足无措，不知道该说什么，默默在旁边陪着就好"}, {"key": "B", "text": "安静地倾听，说一些真心但不多的话，陪伴本身就是最好的支持"}, {"key": "C", "text": "根据对方的性格，判断ta是需要你给建议还是单纯当一个倾听者"}, {"key": "D", "text": "先共情对方的感受，然后帮ta梳理情绪、一起分析问题"}, {"key": "E", "text": "先安抚情绪，然后帮对方看到这件事积极的一面，给ta力量和方向"}]}, {"id": 13, "text": "听到一个你不认识的人的悲惨遭遇，你内心的反应是？", "options": [{"key": "A", "text": "心里会触动一下，但很快就回到自己的世界里了"}, {"key": "B", "text": "如果跟自己的经历相似会特别触动，否则感觉还好"}, {"key": "C", "text": "能设身处地感受对方的痛苦，情绪上会受一定影响"}, {"key": "D", "text": "除了共情，还会想能不能做点什么实际的事来帮助对方"}, {"key": "E", "text": "容易被深深触动，甚至可能主动发起行动去帮助这一群人"}]}, {"id": 14, "text": "在发生争执的时候，你能理解对方的立场吗？", "options": [{"key": "A", "text": "比较难，我通常觉得自己是对的，不太理解对方为什么那样想"}, {"key": "B", "text": "如果对方是我在乎的人，我会试着换位思考一下"}, {"key": "C", "text": "能，我理解每个人的立场背后都有ta的原因和逻辑"}, {"key": "D", "text": "不仅能理解，还能看到双方共同的利益点和可能的和解方案"}, {"key": "E", "text": "理解双方立场后，能快速找到一个让大家都满意的解决方案"}]}, {"id": 15, "text": "对身边人的情绪状态和内心需求，你的关注程度是？", "options": [{"key": "A", "text": "说实话我不太主动关注别人的状态，更多是专注在自己的事情上"}, {"key": "B", "text": "对我在意的人我会特别上心，其他人就不太会留意"}, {"key": "C", "text": "我像一面镜子，能自然地反映和回应对方的情绪状态"}, {"key": "D", "text": "我常是朋友圈里的「情绪中转站」，大家遇到问题愿意来找我聊"}, {"key": "E", "text": "我主动关心团队里每个人的状态，是大家情绪的稳定器和加油站"}]}, {"id": 16, "text": "一个不太熟的人向你提出一个比较过分的请求，你的反应是？", "options": [{"key": "A", "text": "心里很不舒服但可能不知道怎么拒绝，纠结很久最后还是答应了"}, {"key": "B", "text": "看情况，如果觉得不合适会委婉但有分寸地拒绝"}, {"key": "C", "text": "根据对方的态度和彼此关系的亲疏，灵活决定怎么处理"}, {"key": "D", "text": "礼貌但坚定地说不，同时维护好关系不让对方难堪"}, {"key": "E", "text": "直接而友善地拒绝，并清晰地说明自己的边界在哪里"}]}, {"id": 17, "text": "同事总是在下班后发消息跟你聊工作，你内心是什么感受？", "options": [{"key": "A", "text": "很烦躁但又不好意思说，只能默默忍着，假装没看到"}, {"key": "B", "text": "偶尔可以接受，但如果太频繁我会用行动表达自己的界限"}, {"key": "C", "text": "看情况，紧急的可以回，其他的巧妙转移话题或延迟回复"}, {"key": "D", "text": "温和地跟对方沟通，说明自己的时间边界，同时保持友好关系"}, {"key": "E", "text": "直接建立清晰规则，让大家明确知道什么时间可以找你、什么时间不可以"}]}, {"id": 18, "text": "当你拒绝别人时，你心里通常在想什么？", "options": [{"key": "A", "text": "天哪我是不是说错话了？对方会不会因此讨厌我？好纠结……"}, {"key": "B", "text": "这段关系对我重要吗？如果不重要的话，拒绝也没什么关系"}, {"key": "C", "text": "怎么找一个双方都不尴尬的说法，既拒绝又不伤害关系"}, {"key": "D", "text": "坦诚是最好的策略，说清楚真实原因对方反而会更尊重你"}, {"key": "E", "text": "拒绝是一种能力，清晰的边界是对彼此最大的负责任"}]}, {"id": 19, "text": "关于在社交媒体上分享个人生活，你的态度是？", "options": [{"key": "A", "text": "几乎不发，朋友圈设置三天可见，或者干脆什么都不发"}, {"key": "B", "text": "偶尔分享一些真正重要的时刻，而且只给亲近的人看"}, {"key": "C", "text": "有选择地分享，根据不同的平台展示自己不同的侧面"}, {"key": "D", "text": "适度分享，把社交平台当作维系和拓展人脉的有用工具"}, {"key": "E", "text": "乐于分享自己的生活和观点，用内容去影响和激励关注你的人"}]}, {"id": 20, "text": "你心中最理想的社交生活状态是什么样的？", "options": [{"key": "A", "text": "大部分时间独处，偶尔见一两个最亲近的人就已经很满足了"}, {"key": "B", "text": "有几个能深度交流的知己好友，不需要太多无意义的表面社交"}, {"key": "C", "text": "能够自由地在独处和社交之间切换，完全掌控自己的社交节奏"}, {"key": "D", "text": "拥有一个活跃且多元的社交网络，自己处在连接的中心位置"}, {"key": "E", "text": "身边围绕着一群志同道合的人，一起创造有意义的事、互相成就"}]}], "resultTypes": {"A": {"name": "社恐保护层", "subtitle": "安静是一种力量，你的小世界自有其深度", "maturityScore": 80, "indices": [{"label": "内向指数", "value": 92}, {"label": "独处充电能力", "value": 90}, {"label": "深度思考力", "value": 85}], "diagnosis": "你的社交人格处于「社恐保护层」——这不是缺陷，而是一种独特的与世界相处的方式。你对外部社交刺激较为敏感，社交对你来说更像是一种消耗而非充电。你享受独处的深度和宁静，在安静的环境中能发挥出最大的创造力和思考力。你或许只有三五个真正懂你的朋友，但这些关系的质量远高于数量。社会常常推崇外向和社交达人，但内向和谨慎同样是一种力量。重要的是，你不必强迫自己变成一个「社交达人」，你需要的是找到一个尊重你节奏的环境和人群。你的敏感和内向，恰恰让你对世界有着不一样的深刻洞察。请记住，世界上至少有三分之一的人跟你一样，你不是异类，你只是用了不同的天线来接收这个世界。", "radarData": [{"label": "社交能量", "value": 20}, {"label": "社交策略", "value": 35}, {"label": "共情能力", "value": 65}, {"label": "边界意识", "value": 30}, {"label": "社交适应力", "value": 25}], "suitableJobs": ["独立创作者（写作、设计、编程）", "远程自由职业者", "深度研究型岗位", "小而精的亲密团队"], "unsuitableJobs": ["高频应酬的销售岗", "大型团建频繁的公司文化", "完全开放式办公环境"], "pathCompare": {"good": "顺应天赋：在安静、低刺激的环境中深耕自己的专长，用作品和深度而非社交数量来建立影响力。你的能量来自于向内探索，找到允许你这样工作的环境，你会爆发出惊人的创造力。", "bad": "逆天赋：强迫自己参加大量社交活动、在不合适的职场文化中硬撑，会导致持续的能量透支、焦虑加重，甚至产生自我否定。你不是不行，你只是不在适合自己的赛道上。"}, "plan90": ["接纳自我：写下你觉得社交中让你不舒服的具体场景，区分哪些是真正需要调整的，哪些只是外界强加给你的「外向期待」。接受自己的社交节奏，停止自我批判。", "微步练习：每周尝试一次极小的社交挑战——比如主动跟咖啡师说一句「谢谢，今天咖啡很好喝」，或在群里分享一个你认同的观点。小步前进，不求速成。", "建立安全区：找到1-2个让你感觉完全放松、不必伪装的人或小社群，练习在安全环境中的自在表达。安全区是你向外探索的根据地。"], "closing": "你不必强迫自己成为太阳，做一颗安静的星星，同样能照亮属于自己的夜空。", "posterText": "社恐保护层——安静是一种力量", "posterSubtext": "我不是不合群，只是我的世界小而美，深而静"}, "B": {"name": "选择性社交层", "subtitle": "少即是多，高质量的连接胜过万千点头之交", "maturityScore": 85, "indices": [{"label": "选择精准度", "value": 88}, {"label": "深度关系力", "value": 90}, {"label": "自我认知力", "value": 86}], "diagnosis": "你的社交人格处于「选择性社交层」——你并非不善社交，而是选择了更有质量的社交方式。你像一个精明的社交投资家，不把时间浪费在无意义的寒暄和表面关系上，而是将有限的情感资源精准投入到少数真正重要的人身上。你清楚自己跟什么样的人合拍，也明确什么场合会让你不舒服，所以你会主动筛选而不是被动接受。这种选择性不是封闭或高傲，而是一种成熟的自我认知和对自己能量的尊重。你对关系的深度和质量有着天然的追求，浅尝辄止的社交让你觉得索然无味。继续坚持你的标准，不必因为他人的「朋友遍天下」而感到焦虑——几个知己，胜过万千点赞。你的社交哲学是「宁缺毋滥」，这在浮躁的时代里是一种难得的清醒。", "radarData": [{"label": "社交能量", "value": 50}, {"label": "社交策略", "value": 85}, {"label": "共情能力", "value": 75}, {"label": "边界意识", "value": 88}, {"label": "社交适应力", "value": 55}], "suitableJobs": ["精品咨询顾问", "独立自由职业", "小而美的精品工作室", "项目制深度协作岗位"], "unsuitableJobs": ["需要广撒网的纯销售岗", "高频陌生人对接工作", "大型企业的应酬密集型岗位"], "pathCompare": {"good": "顺应天赋：把精力聚焦在少数高质量的关系和专业领域上，用深度和专业度取胜。你的能量来自于有意义的深度连接，而不是社交数量。选择那些重视质量而非数量的环境和团队，你会如鱼得水。", "bad": "逆天赋：逼自己去做广撒网式的社交拓展、强迫自己对每个人都保持热情，会让你快速耗尽能量并产生强烈的虚无感。在不适合的社交节奏中硬撑，只会让你对社交本身产生抵触。"}, "plan90": ["梳理关系地图：列出你当前最在意的5段关系，诚实地评估每段关系的质量、投入产出比以及它在你生命中的意义。砍掉或降级消耗型关系，为真正重要的关系腾出空间。", "明确筛选标准：写下你选择深入交往的三个核心标准（比如：真诚、有趣、能互相成长），让未来的社交决策不再纠结，遇到不符合标准的可以心安理得地保持距离。", "深耕关键关系：每周为一段重要关系做一件具体的小事——一条走心的消息、一次一对一的邀约、一个真诚的赞美或感谢。让深度关系在持续的滋养中生长。"], "closing": "深度比广度更难，也更有价值。做一个有选择的人，是对自己最大的尊重。", "posterText": "选择性社交层——少即是多", "posterSubtext": "几个知己，胜过万千点赞。我的社交信条是宁缺毋滥"}, "C": {"name": "社交变色龙层", "subtitle": "千面一心，灵活是你最强大的社交超能力", "maturityScore": 82, "indices": [{"label": "适应灵活度", "value": 92}, {"label": "角色转换力", "value": 90}, {"label": "环境感知力", "value": 88}], "diagnosis": "你的社交人格处于「社交变色龙层」——你拥有一种令人羡慕的能力：根据环境和对象灵活调整自己的社交模式。你不拘泥于一种固定的社交风格，而是像一个经验丰富的导演，能在不同的社交舞台上自如切换角色。跟长辈在一起时你端庄稳重，跟朋友在一起时你幽默随性，跟客户在一起时你专业自信。这种灵活度让你几乎可以适应任何社交场合，跟不同背景、不同性格的人都能迅速找到共同语言。但要警惕的是，在频繁的切换中不要迷失了真实的自己。适度的「变色」帮助你更好地融入世界，但过度迎合可能会让你忘记自己本来的颜色。你的优势在于灵活和适应力——记得在变色之余，保留一个只属于自己的核心色彩，那是你区别于所有人的独特印记。", "radarData": [{"label": "社交能量", "value": 70}, {"label": "社交策略", "value": 90}, {"label": "共情能力", "value": 85}, {"label": "边界意识", "value": 60}, {"label": "社交适应力", "value": 95}], "suitableJobs": ["公关传媒与品牌管理", "跨界项目经理", "商务拓展与客户管理", "用户研究与市场洞察"], "unsuitableJobs": ["高度重复无需变通的单一岗位", "完全独立无需与人协作的工作", "死板规范不容灵活发挥的职位"], "pathCompare": {"good": "顺应天赋：把你的灵活适应能力用在需要跨部门沟通、对接不同人群的岗位上。你的变色龙天赋是沟通和协调的利器，让你成为团队中不可或缺的「万能接口」。", "bad": "逆天赋：长期在一个不允许灵活发挥、不需要跟人打交道的封闭环境中工作，会让你感到被束缚和压抑。过度迎合他人而不断变换自己，也可能导致自我认同的模糊。"}, "plan90": ["自我觉察日记：连续一周，每次社交结束后花5分钟记录你的真实感受——你是真的享受这段互动，还是只是在「表演」？区分适应和迎合的边界。", "核心锚定练习：写下三个你不能为了适应环境而妥协的核心价值观（比如诚实、不评判他人、不违背内心），贴在每天能看到的地方。变色是能力，不变的是底色。", "真实模式实验：每周刻意选择一次社交机会，不调整、不切换、不迎合——就用最真实的自己去连接。记录对方的反应和你自己的感受，你会发现真实比完美更有吸引力。"], "closing": "适应世界的能力很珍贵，但别忘了——你不需要变成任何人，就已经值得被接纳和喜欢。", "posterText": "社交变色龙层——千面一心", "posterSubtext": "我可以融入任何场合，但我知道自己是谁，这才是真正的灵活"}, "D": {"name": "社交枢纽层", "subtitle": "连接万物，你是人际关系网络中不可或缺的桥梁", "maturityScore": 88, "indices": [{"label": "人脉连接力", "value": 92}, {"label": "资源整合力", "value": 88}, {"label": "社交影响力", "value": 85}], "diagnosis": "你的社交人格处于「社交枢纽层」——你是人际关系网络中天生的连接者和织网人。你有一种独特的直觉：能看到人与人之间的潜在连接点，并且乐于成为那个搭桥铺路的人。你不只是在交朋友，更像是在编织一张有价值的社交网络——你知道谁擅长什么、谁需要什么、谁跟谁能碰撞出火花。你享受把对的人连接在一起带来的成就感，也善于在不同的圈层和领域之间自由穿梭。你是朋友圈里的「信息中转站」和「资源调度中心」，当有人需要找某方面的人或资源时，第一个想到的就是你。保持这份连接世界的热情，但同时也要记得给自己留出独处充电的时间——桥梁也需要定期的维护和加固，而你的根基就是对自己能量的清醒管理。", "radarData": [{"label": "社交能量", "value": 85}, {"label": "社交策略", "value": 90}, {"label": "共情能力", "value": 82}, {"label": "边界意识", "value": 70}, {"label": "社交适应力", "value": 88}], "suitableJobs": ["社群运营与活动策划", "投资人与创业者", "跨界合作项目经理", "行业生态建设者"], "unsuitableJobs": ["完全独立的深度研究岗位", "闭门造车型工作", "几乎不需要人际互动的纯技术岗"], "pathCompare": {"good": "顺应天赋：把你的连接天赋用在大平台、大生态中——做社群、做投资、做跨界整合。你的价值在于让1+1>2，你的网络效应会随着时间指数级增长。选择能放大你连接能力的舞台。", "bad": "逆天赋：被关在一个不需要跟人连接、不需要整合资源的孤岛式岗位上，你会感到被严重压抑。过度连接而忽略深度经营，也可能让你的网络变成表面繁荣的假象。"}, "plan90": ["绘制社交网络图：用一张纸画出你当前的核心社交网络——标注每个人的领域、价值和你们之间的连接强度。找到你网络中的关键节点和潜在的连接空白区。", "深耕关键连接：每周选两个你想要深化连接的人，进行一次有质量的深度交流——不只是交换信息，而是分享思考、提供价值、建立信任。", "建立维护系统：设计一个简单的社交维护机制，比如定期check-in列表、关键日期提醒。让连接不因忙碌而断裂，让网络保持健康的活力。"], "closing": "你是桥，连接孤岛成为大陆。但别忘了——桥也需要自己的根基，才有力量承载他人的通行。", "posterText": "社交枢纽层——连接万物", "posterSubtext": "我享受让对的人相遇，这是我的天赋，也是我的使命"}, "E": {"name": "社交领袖层", "subtitle": "自带光芒，走到哪里都是让人追随的引力中心", "maturityScore": 90, "indices": [{"label": "影响力指数", "value": 95}, {"label": "号召力强度", "value": 92}, {"label": "气场稳定度", "value": 88}], "diagnosis": "你的社交人格处于「社交领袖层」——你在人群中自带光芒，不需要刻意表现就能吸引他人的注意和信任。你的能量和磁场可以影响整个房间的氛围，人们会因为你的存在而感到安心、被激励或被点燃。你不仅自己擅长社交，更拥有一种罕见的能力：让团队中的每个人都能找到自己的位置和光芒。你的领导力不是来自头衔或权威，而是来自于你真诚的关心、对人性深刻的理解以及那种让人愿意跟随的人格魅力。你能够让一盘散沙凝聚成一个有战斗力的团队，让沉默的人愿意开口表达，让混乱的局面变得有序。但要注意的是，领袖也需要被理解和支持——不要过度承担所有人的情绪和责任，给自己留出被照顾的空间，学会适度「卸任」。", "radarData": [{"label": "社交能量", "value": 95}, {"label": "社交策略", "value": 92}, {"label": "共情能力", "value": 90}, {"label": "边界意识", "value": 80}, {"label": "社交适应力", "value": 90}], "suitableJobs": ["团队领导者与管理者", "公众演讲者与意见领袖", "创业者与创始人", "社群领袖与组织者"], "unsuitableJobs": ["完全听命于人的纯执行岗位", "不需要表达和引领的幕后工作", "压抑个人影响力的从属型角色"], "pathCompare": {"good": "顺应天赋：把你的领导力用在一个值得投入的领域——带团队、做社群、搞事业。你的价值在于激发他人的潜能和组织更大的协作。选择能让你发挥影响力的平台，你的能量会吸引对的人自动聚集。", "bad": "逆天赋：长期处于一个压制你影响力、不允许你发言和引领的环境中，会让你感到严重窒息。过度承担所有人的期待而忽略自我照顾，也可能导致领袖的孤独和耗尽。"}, "plan90": ["照镜子获取反馈：找三个你信任且敢说真话的人，请他们诚实地反馈——你的社交风格中有没有让人感到压力或不适的地方？领袖也需要不断校准自己的影响力。", "学会后退：刻意在两次社交场合中不主导、不引领、不第一个发言。练习安静地倾听和跟随，你会发现后退一步有时能看到更大的画面。", "培养新领袖：在你身边选择一个人，在三个月内有意识地帮助ta提升社交自信和领导力。真正的领袖不仅自己发光，更善于点亮别人。"], "closing": "真正的领袖不是让人仰望，而是让身边的每个人都觉得——原来我也可以发光。", "posterText": "社交领袖层——自带光芒", "posterSubtext": "我不需要舞台，因为我走到哪里，哪里就是舞台的中心"}}, "loadingMessages": ["正在解析你的社交基因……", "正在扫描你的能量来源……", "正在识别你的社交策略模式……", "正在评估你的共情天线灵敏度……", "正在测算你的边界防线强度……", "正在生成你的专属社交人格画像……", "分析完成，准备揭晓！"], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "匹配度"}, "mixedNotes": {"A+B": "社恐保护与选择性社交的交叉——你内心深处渴望安全的小圈子，同时又对外部世界有选择地开放。你需要的不是强迫自己变成另一个人，而是在保护好自己的前提下，逐步尝试有选择地拓宽舒适区的边界。从一个小目标开始，比如每个月认识一个让你感觉舒服的新朋友。", "B+C": "选择性社交与变色龙特质并存——你既有筛选关系的清醒，又有适应不同场合的灵活能力。这其实是强大的组合：在重要关系中保持真实，在泛社交中灵活切换。注意不要因为太会「变色」而辜负了那些真正值得你深度连接的人。", "C+D": "变色龙与枢纽的双重天赋——你既能灵活切换社交模式，又有连接他人的天然驱动力。你是一个非常有社交价值的人。唯一需要警惕的是能量管理：频繁切换+大量连接可能让你疲惫不堪，记得给自己设置「离线时间」。", "D+E": "枢纽型与领袖型的强强叠加——你既能编织网络又能引领群体，是天生的社群构建者。你的影响力不仅在于个人魅力，更在于你能让整个生态系统健康运转。平衡连接的广度与深度，确保自己的核心能量不被过度稀释。", "A+E": "社恐保护与社交领袖的奇妙组合——这看似矛盾，实则说明你的社交模式高度依赖场景。在让你感到安全的领域和话题中，你可以是绝对的领袖；但在陌生或不适的环境中，你会退回到保护层。关键是找到那个让你自动切换成领袖模式的「开关场景」。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

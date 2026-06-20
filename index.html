@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>心理测试合集</title>
+<style>
+:root{--bg:#fefaf6;--card:#fff;--text:#2c2420;--muted:#8c7a6b;--primary:#d4784a;--border:#e8ddd2;--radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);--font:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+main{width:100%;max-width:480px;padding:40px 20px}
+h1{font-size:1.6rem;font-weight:800;color:var(--primary);text-align:center;margin-bottom:8px}
+.sub{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:32px}
+.grid{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);text-decoration:none;color:var(--text);transition:all .15s;display:flex;align-items:center;gap:12px}
+.card:active{transform:scale(.98);border-color:var(--primary)}
+.card .icon{font-size:1.5rem;flex-shrink:0}
+.card .info{flex:1;min-width:0}
+.card .title{font-weight:700;font-size:.9rem;margin-bottom:2px}
+.card .desc{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .arrow{color:var(--muted);flex-shrink:0}
+.footer{text-align:center;color:var(--muted);font-size:.7rem;margin-top:40px}
+</style>
+</head>
+<body>
+<main>
+  <h1>🧠 心理测试合集</h1>
+  <p class="sub">选择一个测试，开始了解自己</p>
+  <div class="grid">
+    <a class="card" href="career-bowl/">
+      <span class="icon">🍚</span>
+      <div class="info"><div class="title">你天生适合吃哪碗饭</div><div class="desc">职业方向 · 5种饭碗类型</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="job-vs-startup/">
+      <span class="icon">💼</span>
+      <div class="info"><div class="title">你适合上班还是创业？</div><div class="desc">决策风格 · 风险取向</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="money-gene/">
+      <span class="icon">💰</span>
+      <div class="info"><div class="title">你的搞钱基因是什么类型？</div><div class="desc">赚钱方式 · 财富观念</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="internal-friction/">
+      <span class="icon">😣</span>
+      <div class="info"><div class="title">测测你的内耗等级</div><div class="desc">自我怀疑 · 行动障碍</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="ai-job-safety/">
+      <span class="icon">🤖</span>
+      <div class="info"><div class="title">AI会抢你的饭碗吗？</div><div class="desc">职业安全指数 · 不可替代性</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="city-choice/">
+      <span class="icon">🏙️</span>
+      <div class="info"><div class="title">一线拼还是小城躺？</div><div class="desc">城市选择 · 生活节奏</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="love-type/">
+      <span class="icon">💕</span>
+      <div class="info"><div class="title">你是哪种恋爱体质？</div><div class="desc">依恋风格 · 恋爱人格</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="social-level/">
+      <span class="icon">🗣️</span>
+      <div class="info"><div class="title">测测你的社交人格在第几层</div><div class="desc">社交能量 · 共情能力</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="ideal-life/">
+      <span class="icon">🌈</span>
+      <div class="info"><div class="title">你骨子里想要什么样的生活？</div><div class="desc">生活方式 · 成就定义</div></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="career-decision/">
+      <span class="icon">🔀</span>
+      <div class="info"><div class="title">你该换工作，还是换活法？</div><div class="desc">职业满意度 · 未来愿景</div></div>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+  <p class="footer">纯前端 · 零后端 · 结果在浏览器本地计算<br>本测试仅供娱乐参考，不构成职业/心理建议</p>
+</main>
+</body>
+</html>

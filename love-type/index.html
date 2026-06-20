@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>你是哪种恋爱体质？恋爱人格测试</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "你是哪种恋爱体质？恋爱人格测试", "subtitle": "20道题测出你的恋爱体质类型", "description": "猫系？犬系？水象？风象？还是土象？通过依恋风格、表达方式、情感需求、冲突处理四个维度，深度解析你的恋爱体质。5种恋爱人格类型，附带详细情感诊断和恋爱提升计划。", "keywords": "恋爱体质,恋爱人格,依恋风格,情感测试,恋爱测试,猫系,犬系,小红书测试,恋爱心理", "primaryColor": "#d4784a", "ogImage": ""}, "home": {"title": "你是哪种恋爱体质？", "subtitle": "恋爱人格深度测试", "introHTML": "<p>为什么有的人一谈恋爱就变得不像自己？为什么有的人怎么都追不到？为什么有的关系总是陷入同一种死循环？</p><p><strong>答案可能藏在你的「恋爱体质」里。</strong></p><p>恋爱体质是一个人进入亲密关系后的「默认出厂设置」——它决定了你的依恋风格、表达方式、情感需求和冲突处理模式。</p><p>本测试从四个维度出发，帮你识别自己的恋爱体质类型。<em>了解自己，是拥有好的爱情的第一步。</em></p>", "btnText": "开始测试", "disclaimer": "本测试仅供娱乐参考，不构成心理学诊断。如有情感困扰，请寻求专业心理咨询师的帮助。"}, "dimensions": [{"name": "依恋风格", "icon": "💝", "questionIds": [1, 2, 3, 4, 5]}, {"name": "表达方式", "icon": "💌", "questionIds": [6, 7, 8, 9, 10]}, {"name": "情感需求", "icon": "💭", "questionIds": [11, 12, 13, 14, 15]}, {"name": "冲突处理", "icon": "⚡", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "暧昧期，对方突然两天没主动找你聊天，你的第一反应是？", "options": [{"key": "A", "text": "注意到了但不在意，我也有自己的事要忙，等他来找我再顺势回应"}, {"key": "B", "text": "有点失落，会主动发个表情包试探一下，忍不住想确认他还在不在"}, {"key": "C", "text": "非常焦虑，反复翻聊天记录分析是不是自己说错了什么，晚上睡不好"}, {"key": "D", "text": "无所谓，我可能自己也没注意到两天没联系，突然想起来就发一句"}, {"key": "E", "text": "不会过度解读，但我会有条不紊地推进关系，比如约下次见面的时间"}]}, {"id": 2, "text": "确定关系后，你更喜欢哪种相处频率？", "options": [{"key": "A", "text": "一周见2-3次就够了，我需要充足的个人空间，每天都黏在一起会让我窒息"}, {"key": "B", "text": "最好天天见面，就算不见面也要早晚安+日常分享，知道对方在干嘛才有安全感"}, {"key": "C", "text": "看心情，情绪上头的时候恨不得24小时黏着，理智回归的时候又需要冷静一下"}, {"key": "D", "text": "不设定频率，随性而至。想见就见，不想见就不见，不喜欢被「情侣应该怎样」的规则束缚"}, {"key": "E", "text": "有一个大致的规律就行，比如周末固定约会，平时互不干扰各自的工作和爱好"}]}, {"id": 3, "text": "对方说「我需要一个人静一静」的时候，你的内心OS是？", "options": [{"key": "A", "text": "「太好了，我也正想一个人待会儿。」完全理解并尊重。"}, {"key": "B", "text": "「是不是我做错了什么？他是不是不爱我了？」嘴上说好的，心里开始翻江倒海。"}, {"key": "C", "text": "「他真的只是需要空间吗？还是想分手的前兆？」一边理智提醒自己别多想，一边已经开始做最坏的打算。"}, {"key": "D", "text": "「OK。」然后自己出门旅行了，一周后发照片给他「在冰岛，你呢？」"}, {"key": "E", "text": "「好的，那你需要多久？我们约定一个时间再好好聊。」理性应对，但会在约定时间准时关心。"}]}, {"id": 4, "text": "在一段关系里，你对「承诺」的态度是？", "options": [{"key": "A", "text": "我不需要海誓山盟，但一旦我给出了承诺，就是认真的，只是我不会轻易给"}, {"key": "B", "text": "我希望尽快确认关系方向，「我们是以结婚为目的恋爱吗」这个问题最好早点聊清楚"}, {"key": "C", "text": "我渴望承诺但又害怕承诺——我需要确认自己是被深深爱着的，但又怕承诺意味着失去自由"}, {"key": "D", "text": "听到「承诺」两个字就有点想逃，「我们现在这样不是很好吗？为什么要定义？」"}, {"key": "E", "text": "承诺不是嘴上说的，是一步一步做出来的。我会用时间和行动让对方看到我的认真"}]}, {"id": 5, "text": "分手后，你通常多久能走出来？", "options": [{"key": "A", "text": "表面看起来很快就恢复独处状态了，但内心可能会在某些深夜偶尔想起，不过不会影响生活节奏"}, {"key": "B", "text": "需要很长时间，会反复翻看以前的聊天记录、照片，很难接受「一个人」的状态"}, {"key": "C", "text": "过程像过山车——有时候觉得放下了，有时候又崩溃大哭。情绪起伏很大但最终会好起来"}, {"key": "D", "text": "很快，分手第二天可能就在研究下一个旅行目的地了。不回头是我的性格"}, {"key": "E", "text": "不会崩溃但会认真复盘——哪里出了问题？我学到了什么？然后稳步走出，带着经验进入下一阶段"}]}, {"id": 6, "text": "你更喜欢用哪种方式向伴侣表达爱意？", "options": [{"key": "A", "text": "不太会直接说「我爱你」，更多是用行动——默默记住他的喜好、在他需要的时候出现"}, {"key": "B", "text": "嘴上说+身体接触，喜欢的时候就恨不得让全世界知道，「宝贝」「想你」挂在嘴边"}, {"key": "C", "text": "用极其细腻的方式表达——写长信、送用心准备的礼物、记住他说过的每一句话"}, {"key": "D", "text": "用有趣的聊天和思想上的共鸣表达爱意——给你分享一首歌、一篇文章、一个奇怪的想法"}, {"key": "E", "text": "务实型表达——帮你解决实际问题、为你下厨、把你的生活打理得井井有条"}]}, {"id": 7, "text": "在伴侣面前，你能自在地哭出来吗？", "options": [{"key": "A", "text": "不太能，我习惯在人前保持体面，脆弱的一面自己消化就好"}, {"key": "B", "text": "能，我觉得在爱人面前哭是很正常的事，这是亲密的证明"}, {"key": "C", "text": "不仅会哭，而且情绪来了完全藏不住——喜怒哀乐全都写在脸上"}, {"key": "D", "text": "很少哭，不是因为能忍，而是我倾向于用理性分析替代情绪宣泄"}, {"key": "E", "text": "偶尔会，但不会大哭大闹。可能会眼眶红一下，然后深呼吸说「我没事，继续讨论解决方案吧」"}]}, {"id": 8, "text": "伴侣过生日，你更倾向于？", "options": [{"key": "A", "text": "精心准备一个他可能会喜欢但不会太夸张的礼物，在凌晨准时发一条走心的生日快乐"}, {"key": "B", "text": "大费周章！气球蛋糕惊喜party朋友圈小作文一条龙，爱就要让全世界看到"}, {"key": "C", "text": "手工制作的礼物+一封长长的信，把这段时间的感动和感谢都写进去，边写边哭"}, {"key": "D", "text": "带他去做一件没做过的事——跳伞、看展、road trip，礼物是什么不重要，一起体验才重要"}, {"key": "E", "text": "提前很久就开始攒钱准备一个实用又有品质的礼物，外加一顿亲手做的烛光晚餐"}]}, {"id": 9, "text": "你觉得「仪式感」在一段关系里有多重要？", "options": [{"key": "A", "text": "有最好，没有也行。我更喜欢不经意的浪漫，而非被节日绑架的仪式"}, {"key": "B", "text": "超级重要！纪念日必须过，情话必须说，仪式感就是爱情里的「签到打卡」"}, {"key": "C", "text": "非常重要，但不是为了发朋友圈——我需要那些瞬间来感受「爱还在流动」"}, {"key": "D", "text": "不太重要，甚至有点抗拒。当所有人都要做同一件事的时候，我就想干点别的"}, {"key": "E", "text": "适度的仪式感是关系的调味剂，但核心是日常的照顾和陪伴，那个才是主食"}]}, {"id": 10, "text": "你觉得最能打动你的表白方式是？", "options": [{"key": "A", "text": "在一个普通的时刻，他认真地看着我说「和你在一起我很舒服」，不肉麻但很真"}, {"key": "B", "text": "热情直接：「我喜欢你！和我在一起吧！」那种藏不住的冲动最动人"}, {"key": "C", "text": "细节满满的深情告白，能说出我都没注意到的关于我自己的小事，让我觉得「原来他一直在认真看我」"}, {"key": "D", "text": "不是「我喜欢你」，而是「我们一起去冰岛追极光吧」——邀请我进入他的世界比表白更让我心动"}, {"key": "E", "text": "最打动我的不是一句话，而是他默默做的一切——当我回头看发现他已经用行动表白很久了"}]}, {"id": 11, "text": "在感情中，你内心深处最渴望的是什么？", "options": [{"key": "A", "text": "被理解但不被打扰——希望有一个人能看懂我的独立和疏离背后的温柔，但不试图改造我"}, {"key": "B", "text": "被需要、被陪伴——我最怕的不是吵架，而是「不被回应」的感觉，那对我来说就是不被爱"}, {"key": "C", "text": "灵魂的深度连接——我需要一个能和我一起潜入情感深海的人，浅尝辄止的关系让我更孤独"}, {"key": "D", "text": "智识上的同频和自由的呼吸感——我要的「在一起」是两个人并肩看世界，而不是面对面互相捆绑"}, {"key": "E", "text": "稳定和安全——我希望这段关系像一棵树，根扎得深，不管外面风吹雨打，我们在树下很安心"}]}, {"id": 12, "text": "如果伴侣因为工作太忙冷落了你一段时间，你的反应是？", "options": [{"key": "A", "text": "「正好，我也有自己的项目要忙。」理解且不会过度反应，忙完再说"}, {"key": "B", "text": "嘴上说「没事你忙」，但会隔三差五发消息提醒自己的存在，需要被安抚"}, {"key": "C", "text": "开始疯狂内耗——「他是不是不爱我了」「是不是有了别人」——但不会直接说，而是用情绪让对方感受到我的不满"}, {"key": "D", "text": "「OK那我也去忙了，甚至比你更忙。」然后消失一段时间，等他来找我"}, {"key": "E", "text": "理性沟通：「我知道你很忙，但我们能约定一个每周固定交流的时间吗？哪怕半小时。」"}]}, {"id": 13, "text": "你对「被搭讪」这件事的态度是？", "options": [{"key": "A", "text": "礼貌但疏离地回应，如果对方有趣可能会慢慢观察，但一开始会保持距离"}, {"key": "B", "text": "开心啊！不管有没有后续，被人喜欢总是一件值得高兴的事"}, {"key": "C", "text": "忐忑又期待。会很紧张但内心深处也渴望被看见，只是不知道该怎么回应"}, {"key": "D", "text": "如果聊天内容足够有趣我会积极回应，但如果只是「美女加个微信」就礼貌地溜了"}, {"key": "E", "text": "不会特别激动，先观察对方的诚意和靠谱程度，冲动型的好感我不太信"}]}, {"id": 14, "text": "在感情中，你最接受不了的事情是？", "options": [{"key": "A", "text": "被控制。比如对方要求我随时报备行踪、限制我的社交圈，这比吵架更让我窒息"}, {"key": "B", "text": "被忽视。我发消息他看了不回、我分享的东西他没有回应——冷暴力是我的底线"}, {"key": "C", "text": "被欺骗。哪怕是一个很小的谎言，也会让我对整个关系的真实性产生怀疑"}, {"key": "D", "text": "被束缚。比如「结婚就要怎样」「女朋友就应该怎样」——不要用标签定义我"}, {"key": "E", "text": "被敷衍。我不需要你时时刻刻热情如火，但至少对这段关系要有基本的认真和尊重"}]}, {"id": 15, "text": "你如何看待「恋爱脑」？", "options": [{"key": "A", "text": "有点羡慕但做不来。我可以深情，但不会让对方成为我生活的全部重心"}, {"key": "B", "text": "我可能就是。恋爱的时候满脑子都是他，朋友的劝告都听不进去，但我觉得这很真诚"}, {"key": "C", "text": "时而恋爱脑时而人间清醒，在深陷和清醒之间反复横跳，这本身就是一种痛苦"}, {"key": "D", "text": "完全理解不能。谈恋爱就谈恋爱，为什么要放弃自己的生活和理智？"}, {"key": "E", "text": "年轻时候是，现在治愈了。比起「爱得轰轰烈烈」，我更珍惜「爱得稳稳当当」"}]}, {"id": 16, "text": "和伴侣发生争执时，你的本能反应是？", "options": [{"key": "A", "text": "先冷静一下再说。我会暂停争吵然后一个人待着，等情绪平复后再理性讨论"}, {"key": "B", "text": "马上沟通！我不想让矛盾过夜，有什么问题现在就说清楚，冷战比吵架更伤人"}, {"key": "C", "text": "情绪爆发——可能会说一些伤人的话，然后后悔，然后不知道该怎么收场，然后自己偷偷哭"}, {"key": "D", "text": "理性辩论——我会像打辩论一样逐条陈述我的观点。我不是在吵架，我是在论证。"}, {"key": "E", "text": "先不说话，观察一下——是小事就算了，如果是原则问题就认真谈，不翻旧账不说狠话"}]}, {"id": 17, "text": "吵完架后你是「先低头」的那一方吗？", "options": [{"key": "A", "text": "不太会主动低头，但如果对方先迈出一步，我会顺势和解。我的骄傲比你想的要多一点"}, {"key": "B", "text": "通常是。我很怕冷战的气氛，哪怕不是我的错也愿意先说对不起来打破僵局"}, {"key": "C", "text": "看心情——有时候觉得「凭什么总是我先低头」，有时候又想「算了吧他开心就好」，非常不稳定"}, {"key": "D", "text": "不存在的，我甚至可能已经忘了我们在吵架。我擅长用幽默或其他话题自然地把事情翻篇"}, {"key": "E", "text": "谁有道理谁先说话，或者我先冷静分析一下情况，然后主动说「我们好好谈谈吧」"}]}, {"id": 18, "text": "过去的感情经历中，最常导致你们分手的原因是？", "options": [{"key": "A", "text": "对方觉得我「太独立」「不够黏人」「好像不怎么需要他」。我确实需要很多独处时间"}, {"key": "B", "text": "对方觉得我「太黏人」「没有安全感」「让他喘不过气」。我知道但我改不了"}, {"key": "C", "text": "情绪起伏太大，好的时候像天堂，吵的时候像地狱。两个人都累了"}, {"key": "D", "text": "感情还在，但「未来规划」对不上。当关系开始变得「沉重」，我就想逃"}, {"key": "E", "text": "没有特别戏剧性的原因，更多是「走着走着就走散了」——但我承认我可能太务实了，不够浪漫"}]}, {"id": 19, "text": "如果伴侣喜欢冷战，你会？", "options": [{"key": "A", "text": "冷战就冷战，我可以比你更冷。我的自尊不允许我先破冰"}, {"key": "B", "text": "完全受不了，冷战对我来说是最残忍的惩罚，我会不停地试探、发消息直到他回应为止"}, {"key": "C", "text": "冷战期间我会脑补出一部悲情大戏，然后把剧情当真，用更冷的方式回击，但其实内心在流血"}, {"key": "D", "text": "如果超过48小时还没好，我就会直接说「要么我们好好聊，要么就到此为止」，不接受冷战消耗"}, {"key": "E", "text": "给彼此一段冷静期，但会在24小时内发一条「等你准备好了我们谈谈」，表明态度但不施压"}]}, {"id": 20, "text": "关于爱情，下面哪句话最接近你的人生感悟？", "options": [{"key": "A", "text": "「我爱你，但我仍然是自己的那座孤岛。」——好的爱情是两个完整的人相遇，不是半个人找另一半"}, {"key": "B", "text": "「爱是陪伴，是你在身边我就安心。」——我不需要惊天动地，我需要一个永远有回应的人"}, {"key": "C", "text": "「爱是一起在深海里憋气。」——太浅的喜欢让我无聊，我要的是能一起沉入情感深渊的人"}, {"key": "D", "text": "「爱不是彼此凝视，而是一起朝一个方向看。」——我们是旅伴，不是彼此的牢笼"}, {"key": "E", "text": "「爱不是嘴上说了什么，而是这些年做了什么。」——时间会去掉所有滤镜，剩下的才是真的"}]}], "resultTypes": {"A": {"name": "猫系体质", "subtitle": "独立优雅，需要空间，慢热但深情", "maturityScore": 82, "indices": [{"label": "独立性指数", "value": 95}, {"label": "慢热程度", "value": 88}, {"label": "忠诚深度", "value": 80}], "diagnosis": "你是典型的「猫系恋人」——就像一只优雅的猫，不会轻易对你摇尾巴，但一旦认定了你，便是一生的信赖。你的爱需要时间，不是所有人都能等到你「翻开肚皮」的那一刻。你非常珍视个人空间和自我边界，不喜欢被控制或被过度依赖。这可能会让一些安全感不足的伴侣感到困惑：「你为什么不像别人的男/女朋友那样黏人？」但那不是你的错——懂得欣赏你的人会发现，你的独立不是冷漠，而是一种成熟：你不需要对方来填补你的空缺，你只是邀请对方来参与你本就精彩的人生。", "radarData": [{"label": "安全感（依恋风格）", "value": 75}, {"label": "表达欲（表达方式）", "value": 30}, {"label": "情感深度（情感需求）", "value": 80}, {"label": "冲突冷静度", "value": 85}, {"label": "浪漫指数", "value": 40}], "suitableJobs": ["同样独立、有自己事业和社交圈的「成熟型伴侣」", "能欣赏慢热性格，愿意用时间换取信任的「耐心型伴侣」", "也需要个人空间，理解「在一起但各自独立」模式的「同频型伴侣」", "内心强大、不会因为你的独立而产生不安全感的「自信型伴侣」"], "unsuitableJobs": ["极度黏人、需要24小时情感回应的高需求型伴侣", "控制欲强、试图改变你独立性格的支配型伴侣", "缺乏安全感、会把你的慢热解读为「不爱我」的焦虑型伴侣"], "pathCompare": {"good": "顺应猫系天性：坚持自己的独立节奏，在关系里保持自我完整的同时学习适度表达——不需要变成狗系，但可以让对方知道「我不是不想你，我只是不习惯说出来」。", "bad": "强行改变自己：因为对方的压力逼自己变得黏人、热情、外向，结果不仅自己不快乐，对方也会感受到你的不真实。你不是高冷，你只是需要时间。"}, "plan90": ["第1-30天：每天练习一次「主动表达」——哪怕只是一条「今天看到这个想到你了」的消息。你不必变成话痨，但可以让对方知道你在意。", "第31-60天：和伴侣进行一次深度沟通，坦诚地告诉他「我需要独处不是不爱你，而是我充电的方式」。建立关系中的「空间协议」——哪些时间属于自己，哪些时间属于彼此。", "第61-90天：尝试一次主动策划的约会——不需要什么隆重惊喜，一个小小的、你用心设计的事情就够了。让他看到，你的猫式浪漫也很动人。"], "closing": "你不是高冷，你只是把温柔留给了少数值得的人——而这份稀缺，恰恰是你最迷人的地方。", "posterText": "猫系体质——我慢热，但我深情", "posterSubtext": "你的恋爱体质是什么？测一下！"}, "B": {"name": "犬系体质", "subtitle": "忠诚热情，需要陪伴，爱就要让全世界知道", "maturityScore": 78, "indices": [{"label": "情感表达力", "value": 95}, {"label": "陪伴需求度", "value": 90}, {"label": "忠诚指数", "value": 92}], "diagnosis": "你就是那种让朋友感叹「你也太好了吧」的「犬系恋人」——真诚、热情、忠诚，你的爱就像一只摇着尾巴扑上来的金毛，温暖得让人无法抗拒。你喜欢用最直接的方式表达在乎：早安晚安、日常分享、朋友圈的公开表白、纪念日的精心准备。对你来说，爱就是要被看见、被回应、被认真对待。你不觉得「黏人」是缺点——「我爱你就想和你在一起，有什么问题？」你的坦诚和热烈是稀有品质，但有时候需要留意：不是所有人都能承受这种密度的爱，学会偶尔退后一步，给对方呼吸的空间。", "radarData": [{"label": "安全感（依恋风格）", "value": 45}, {"label": "表达欲（表达方式）", "value": 95}, {"label": "情感深度（情感需求）", "value": 85}, {"label": "冲突冷静度", "value": 35}, {"label": "浪漫指数", "value": 90}], "suitableJobs": ["同样热情、喜欢黏在一起的「双向奔赴型伴侣」", "内心温柔、能接住你所有热情并给予回应的「温暖型伴侣」", "性格稳定、能包容你的小情绪波动且不嫌烦的「韧性型伴侣」", "也喜欢被宠爱、享受仪式感和热恋日常的「同频型伴侣」"], "unsuitableJobs": ["极度需要个人空间、觉得你「太黏」的猫系型伴侣", "情感回避、对你的热情没有回应的回避型伴侣", "觉得你的爱「太沉重」而承受不住的自由至上的伴侣"], "pathCompare": {"good": "接纳犬系热情：保持你的热情和真诚——这是你最珍贵的品质。同时学会建立安全感的内在来源，而不是全部依赖对方的回应。适当给伴侣一些呼吸的空间，你的爱不靠拼命靠近来证明。", "bad": "把热情变消耗：因为害怕失去而加倍输出，用更多的消息和关心去填每一个安全感的窟窿，结果让对方感到窒息，自己也越来越累。"}, "plan90": ["第1-30天：做一个「回应期待」的小练习——当你发消息后对方没有及时回复，不追发第二条，而是去做一件让自己开心的事。记录这样做之后的感受变化。", "第31-60天：和伴侣讨论「舒适距离」——什么频率的联系对彼此来说最舒服？了解对方的需求，也在关系中加入一点点「有质量的独处」时间（哪怕只是各自看书）。", "第61-90天：培养一项不依赖伴侣的兴趣爱好或社交圈。不是因为你不够爱了，而是因为一个完整的人才能给出健康的爱。你试试看——那种「我有自己的世界但依然选择爱你」的感觉，比「我没有你不行」更吸引人。"], "closing": "你的热烈不是问题，你的真诚不是负担——你是爱情里那个「让爱变得简单」的人。好好珍惜这份天赋。", "posterText": "犬系体质——爱就要热烈地表达，藏不住的喜欢", "posterSubtext": "看看你是哪种恋爱体质？"}, "C": {"name": "水象体质", "subtitle": "情感深邃，共情力强，爱如潮水般汹涌而细腻", "maturityScore": 75, "indices": [{"label": "情感深度", "value": 95}, {"label": "共情能力", "value": 92}, {"label": "情绪稳定性", "value": 30}], "diagnosis": "你是情感世界里的「深海潜水者」——水象体质的你拥有惊人的共情能力和情感深度。你可以感受到别人忽略的情绪暗流，可以写出最动人的情书，也可以为一部电影哭上三天。你对爱的体验是全身心的投入，在最好的时候，你让伴侣感受到无与伦比的温柔和理解；在最坏的时候，情绪的波涛也会让关系变得动荡。你的爱人常常困惑：「为什么刚才还好好的，现在突然就哭了？」但这正是你——不满足于爱情的表层，你想要潜到最深的地方，去触摸最真实的温度和痛感。学会和你的情绪做朋友，而不是被它淹没，是你一生的课题。", "radarData": [{"label": "安全感（依恋风格）", "value": 30}, {"label": "表达欲（表达方式）", "value": 80}, {"label": "情感深度（情感需求）", "value": 95}, {"label": "冲突冷静度", "value": 25}, {"label": "浪漫指数", "value": 88}], "suitableJobs": ["能接住你所有情绪波动的「深海潜水员型伴侣」——不自讨苦吃，而是陪伴你游过那些暗流", "性格沉稳、像锚一样在你情绪风暴中保持稳定的「定海神针型伴侣」", "也有丰富情感世界、能和你一起在感情深海中共舞的「同类型伴侣」", "真诚善良、虽然不完全理解你的情绪但始终愿意耐心陪伴的「温柔型伴侣」"], "unsuitableJobs": ["情感淡漠、会把你「想太多」当作矫情的理性至上伴侣", "回避深度沟通、在你需要倾诉时选择逃避的回避型伴侣", "性格粗线条、无法感知你细微情绪变化的大条型伴侣"], "pathCompare": {"good": "接纳水的本性：允许自己在爱中深沉和敏感——这是天赋不是缺陷。同时建立情绪的「防波堤」：书写、运动、艺术、咨询——让情感有出口而不是全部倾倒在关系里。学会暂停，在情绪袭来时说「我现在需要一点时间整理自己」。", "bad": "让情绪掌控一切：「我不高兴你今天完蛋了」——每一次情绪起伏都变成关系危机，伴侣逐渐从「心疼你想陪你走出来」变成「我累了不知道怎么做才对」。"}, "plan90": ["第1-30天：建立情绪日记的习惯——每次感受到强烈情绪时，写下来：触发事件、我的感受、我当时的想法、后续的行为。你会开始看到自己的情绪模式。", "第31-60天：练习「情绪暂停技术」——当情绪像潮水涌来时，先做三次深呼吸，告诉自己「我可以有这种感觉，但我不需要立刻行动」。一次不反应，你会发现风暴会自然消退。", "第61-90天：和伴侣进行一次「情绪说明书」式的沟通——不是抱怨，而是告诉他「当我XXX的时候，我最需要的是XXX」「当你XXX的时候，我的感受是XXX，但我理解你可能不是故意的」。把对方变成盟友而不是靶子。"], "closing": "你的敏感不是脆弱，是你感知世界的天线——它让你痛苦，但也让你比任何人都更深刻地活着和爱着。", "posterText": "水象体质——爱到极致的深情，都藏在我的敏感里", "posterSubtext": "你知道自己的恋爱体质吗？"}, "D": {"name": "风象体质", "subtitle": "自由如风，智性至上，爱是并肩看世界而不是互相捆绑", "maturityScore": 80, "indices": [{"label": "自由需求度", "value": 93}, {"label": "智性吸引力", "value": 90}, {"label": "承诺意愿", "value": 30}], "diagnosis": "你是爱情中的「风筝」——永远需要一根线把你和地面相连，但又永远需要天空。对你来说，最有吸引力的不是脸红心跳的浪漫，而是一个有趣的灵魂：深夜的长谈、观点的交锋、一起探索未知的世界——这些「精神上的共振」比任何甜言蜜语更能让你心动。但你的伴侣常常为此苦恼：「你到底喜不喜欢我？为什么你好像不需要我？」答案是你喜欢，但你「需要」的方式和别人不一样——你需要的不是24小时的陪伴，而是一个让你觉得「和他在一起的时候，我依然是自由的」的人。承诺对你来说不是牢笼，但你需要一个人懂得：被爱上不是被囚禁。", "radarData": [{"label": "安全感（依恋风格）", "value": 65}, {"label": "表达欲（表达方式）", "value": 55}, {"label": "情感深度（情感需求）", "value": 60}, {"label": "冲突冷静度", "value": 90}, {"label": "浪漫指数", "value": 50}], "suitableJobs": ["同样独立、把爱情看作「旅伴关系」而非「共生关系」的「同行者型伴侣」", "有丰富的智识世界、能和你进行高质量精神交流的「灵魂对谈者型伴侣」", "内心强大、不会被你的「若即若离」触发焦虑的「安全型伴侣」", "同样热爱探索世界、不把稳定当目的而把体验当核心的「冒险家型伴侣」"], "unsuitableJobs": ["对你的独立性感到不安、试图用「你应该XXX」来规范你行为的伴侣", "情感需求极高、把你的距离感解读为不在乎的伴侣", "无法接受「你先去追你的风，我在这里等你」这种关系模式的传统型伴侣"], "pathCompare": {"good": "优雅飞行：保持对自由和智识的追求，同时学着用对方能理解的方式表达在乎——不一定是天天说爱你，但可以让对方知道「我在外面探索的时候，心里是惦记着你的」。主动创造微小的确定感。", "bad": "随风乱飘：用「追求自由」当作逃避承诺和责任的借口，每次都因为「关系变得太正式」而逃走，最终那些真正美好的关系都被你自己放飞了。"}, "plan90": ["第1-30天：练习「主动报备」——不是臣服于控制，而是尊重的体现。当你需要独处或自由时间时，主动告诉对方「接下来我要专注做XXX，大概XX时间和你联系」。给对方确定感。", "第31-60天：策划一次「风象式浪漫」——不一定是烛光晚餐，而是一个能体现你独特用心的体验：比如带他去一家你私藏的独立书店、分享你最近在思考的一个有趣话题。让对方看到你爱人的方式虽然不传统但很真诚。", "第61-90天：认真思考并写下来：我对「承诺」到底害怕什么？是害怕失去自由、害怕选错人、还是害怕自己不够好？把这些写成文字，然后和伴侣（或信任的朋友）进行一次坦诚的对话。面对恐惧，风也可以有方向。"], "closing": "你不是不想被抓住，你只是不想被攥紧——最好的爱人是那个知道怎么「放风筝」的人。", "posterText": "风象体质——你负责追风，我负责等你回头", "posterSubtext": "你的恋爱体质是哪一种？"}, "E": {"name": "土象体质", "subtitle": "稳重务实，用行动说爱，时间会证明一切", "maturityScore": 85, "indices": [{"label": "稳定指数", "value": 93}, {"label": "行动力", "value": 88}, {"label": "浪漫表达力", "value": 25}], "diagnosis": "你是感情世界里的「守护者」——土象体质的你，相信「爱不是说出来的，是做出来的」。你不是那个会在朋友圈发长篇情书的人，但你是那个记得伴侣所有重要日期、在他生病时煲好汤送到门口、一年如一日地经营这段关系的人。你的爱像一棵慢慢生长的树，没有绚烂的花但根深叶茂。务实、可靠、有担当——这些看起来不够「浪漫」的品质，在浮躁的时代里其实是最顶尖的浪漫。你唯一的「短板」是：不擅于用语言和情绪来表达爱意，有时候会让伴侣觉得「你是不是不够喜欢我？」答案恰恰相反——你太喜欢了，所以你选择用最笨也最真实的方式去证明。", "radarData": [{"label": "安全感（依恋风格）", "value": 78}, {"label": "表达欲（表达方式）", "value": 20}, {"label": "情感深度（情感需求）", "value": 65}, {"label": "冲突冷静度", "value": 85}, {"label": "浪漫指数", "value": 25}], "suitableJobs": ["懂得欣赏「行动之爱」、不会被朋友圈恩爱绑架的「务实型伴侣」", "也需要稳定性、和你一样重视关系长远规划的「长期主义型伴侣」", "情感触角细腻、能看穿你的沉默和行动背后深情的「理解型伴侣」", "性格温和有耐心、愿意等你慢慢学着用语言表达爱的「温柔型伴侣」"], "unsuitableJobs": ["极度需要甜言蜜语和情绪价值、觉得你不说就是不爱的「高表达需求型伴侣」", "追求激情和新鲜感、受不了你「温水煮青蛙」式恋爱节奏的伴侣", "把务实解读为木讷、不懂得欣赏你独特浪漫的人"], "pathCompare": {"good": "巩固土的优势：坚持用行动表达在乎——这是你最正的底气。同时有意识地在日常生活里加入点滴「口头表达」——不需要变成狗系热恋选手，但可以从小小的「今天辛苦了」「和你在一起很好」开始。", "bad": "完全拒绝表达：坚信「我做了什么已经够了」，对伴侣渴望语言确认的需求嗤之以鼻。时间会证明一切没错，但如果你从来不说话，对方可能等不到被时间证明的那一天。"}, "plan90": ["第1-30天：每天至少说一句表达欣赏或感谢的话——「今天的饭很好吃」「你今天穿这件很好看」「谢谢你等我」。起初可能觉得别扭，但它会慢慢变成你的肌肉记忆。", "第31-60天：策划一次「有仪式感的日常」——不必是盛大的纪念日惊喜，而是一个普通周末，做一顿精心准备的晚餐，告诉他「我只是想好好和你吃顿饭」。让他看到你「不说但做」的进化版。", "第61-90天：写一封信（或长消息）给伴侣，主题是「我可能从来没有说出口的那些话」。不一定要华丽的文笔，真诚即可。你可能会惊讶地发现——对方等这些话等了多久。"], "closing": "你的爱像土地——不喧哗、不招摇，但万物由此生长。这是最古老的、也是最稳固的浪漫。", "posterText": "土象体质——我从来不说「我爱你」，但我的每一天都在说", "posterSubtext": "测测你的恋爱体质吧！"}}, "loadingMessages": ["正在分析你的依恋风格…", "正在识别你的情感表达模式…", "正在评估你的情感需求深度…", "正在扫描你的冲突处理方式…", "正在描绘你的恋爱体质画像…", "正在生成专属情感报告…", "分析完成，请查收你的恋爱体质报告。"], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "匹配度"}, "mixedNotes": {"A+B": "你同时具备猫系的独立和犬系的热情，看起来有些矛盾但实则很完整——你可能在关系初期像猫一样慢热，但一旦卸下防备，内心的犬系热情就会释放。对方需要先赢得你的信任才能看到你全部的温柔。", "A+C": "猫系的疏离加上水象的深情，你的内心世界非常复杂。表面是「我不需要任何人」，内心是「我怕一旦需要了就会被抛弃」。你需要的是一个既不侵犯你边界、又能接住你偶尔情绪崩塌的伴侣。", "A+D": "独立+自由的强强组合——你是那种「谈恋爱但不谈恋爱脑」的典范。你享受关系但不被关系定义，这让你非常有魅力，但也可能让伴侣困惑「你到底有多在乎我」。适度表达你的在乎是你需要练习的课题。", "A+E": "猫系的慢热加上土象的务实，这是「日久生情」和「日久见人心」的结合。你不太可能一见钟情，但一旦建立了信任，会是最忠诚和最可靠的伴侣。你需要的是一个有耐心的、能陪你走过漫长观察期的人。", "B+C": "犬系的热情加上水象的深情——你的爱浓烈而炙热，能让对方感受到极大的情绪价值和被爱感。但同时，你也会有水象的情绪波动和犬系的分离焦虑，需要一个既能享受你的热烈又能安抚你的脆弱的伴侣。", "B+D": "有趣的混搭——犬系需要陪伴，风象需要自由，这两者在打架。你可能在关系里反复横跳：一会儿想把对方绑在身边，一会儿又想逃。建议认真厘清自己真正想要的是什么。", "B+E": "犬系的表达欲加上土象的务实行动——你可能是最「圆满」的恋人类型之一。你既会说情话又会做实事，既提供情绪价值又提供物质保障。保持这种平衡，你已经做到了很多人一生都学不会的事。", "C+D": "水象的深情加上风象的自由——这是最容易被误解的组合。你可能渴望深度连接又在连接太深时想逃。你需要的是一个能给你「安全感的弹性」的人：紧的时候不让你窒息，松的时候不让你觉得被抛弃。", "C+E": "水象的情感深度加上土象的稳定——你懂得深情也懂得用时间去淬炼感情。但有时你可能对自己的情绪要求太高（土象的理性压制水象的感性），试着允许自己在安全的关系里偶尔失控。", "D+E": "风象的自由加上土象的务实——你可能是那种「虽然不太会表达但非常可靠」的伴侣。你喜欢独立但也重视承诺。你的挑战是让伴侣看到你风一样自由的外表下，那颗土一样扎实的心。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>测测你的内耗等级</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "测测你的内耗等级", "subtitle": "你每天有多少精力被自己消耗了？", "description": "你是不是经常觉得什么都没干却累得不行？脑子里永远在开辩论会？本测试从自我怀疑、完美主义、比较焦虑、行动障碍四个维度，精准诊断你的内耗等级。超过100万人测试，评论区点赞最高：「比心理咨询师还一针见血！」", "keywords": "内耗测试,精神内耗,自我怀疑,完美主义,焦虑,拖延症,心理健康,自我成长", "primaryColor": "#7B68EE", "ogImage": ""}, "home": {"title": "测测你的内耗等级", "subtitle": "20道题看清你每天有多少精力被自己消耗了", "introHTML": "<p>你有没有这样的时刻：<strong>明明什么都没干，却累到不行？</strong></p><p>脑子里永远在开辩论会——「我是不是做错了？」「别人是不是比我强？」「我到底行不行？」——这些声音像背景音乐一样，24小时在你脑子里循环播放。</p><p>这就是<strong>精神内耗</strong>。它比996更消耗你，比加班更让你疲惫。而且最可怕的是——<strong>你可能已经习惯了这种消耗，甚至不知道「不内耗」是什么感觉。</strong></p><p>本测试从<strong>自我怀疑、完美主义、比较焦虑、行动障碍</strong>四大维度，精准诊断你的内耗等级。准备好了吗？真相可能有点扎心。</p>", "btnText": "开始测试", "disclaimer": "本测试仅供自我觉察和娱乐参考，不能替代专业心理咨询。如果你长期感到严重的焦虑或抑郁情绪，请寻求专业帮助。"}, "dimensions": [{"name": "自我怀疑", "icon": "🔍", "questionIds": [1, 2, 3, 4, 5]}, {"name": "完美主义", "icon": "✨", "questionIds": [6, 7, 8, 9, 10]}, {"name": "比较焦虑", "icon": "👀", "questionIds": [11, 12, 13, 14, 15]}, {"name": "行动障碍", "icon": "🧱", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "做完一件事之后，你脑子里最常出现的内心OS是？", "options": [{"key": "A", "text": "「我刚才是不是说错话了？」「那个细节好像没弄好……」反复回放，没完没了"}, {"key": "B", "text": "「还行吧，但应该可以更好的」——永远觉得差了那么一点点"}, {"key": "C", "text": "偶尔会复盘一下，但不会纠结太久就翻篇了"}, {"key": "D", "text": "做完了就过去了，想那么多干嘛，有那时间不如干下一件"}, {"key": "E", "text": "还没做完就已经跳到下一件事了，懒得回头想"}]}, {"id": 2, "text": "老板或重要的人突然给你发一条「有空吗？我们聊聊」，你的第一反应是？", "options": [{"key": "A", "text": "手心出汗心跳加速，脑子里疯狂回放最近是不是做错了什么"}, {"key": "B", "text": "会紧张，脑子里闪过好几个可能性，但会深呼吸告诉自己别多想"}, {"key": "C", "text": "稍微咯噔一下，但马上恢复正常，该干嘛干嘛"}, {"key": "D", "text": "内心毫无波澜，大概是有新任务要安排"}, {"key": "E", "text": "直接回「什么事？」，懒得猜谜语"}]}, {"id": 3, "text": "别人真诚地夸你的时候，你内心的第一反应是？", "options": [{"key": "A", "text": "「他只是客气吧」「他还没发现我真正的水平」——完全不敢相信"}, {"key": "B", "text": "开心一秒钟，然后立刻想「下次得做得更好，不能让人失望」"}, {"key": "C", "text": "坦然地开心，知道自己确实付出了努力，值得被认可"}, {"key": "D", "text": "不会太在意夸奖，我自己做得好不好我心里有数"}, {"key": "E", "text": "不太关注别人的评价，我更在意自己是否完成了目标"}]}, {"id": 4, "text": "夜深人静躺在床上准备入睡的时候，你的大脑通常在做什么？", "options": [{"key": "A", "text": "自动回放今天说错的每一句话、做错的每一件事，反复鞭尸"}, {"key": "B", "text": "复盘今天的得失，规划明天要做什么，脑子停不下来"}, {"key": "C", "text": "偶尔有些想法飘过，翻个身就能睡着"}, {"key": "D", "text": "基本倒头就睡，睡眠质量很好"}, {"key": "E", "text": "实在睡不着就起来干活，累了自然就困了"}]}, {"id": 5, "text": "做了一个重要决定（比如换工作/分手/搬家）之后，你的后续操作是？", "options": [{"key": "A", "text": "反复质疑自己是不是选错了，在不同选项之间反复横跳，疯狂内耗"}, {"key": "B", "text": "会纠结好几天甚至好几周，但最终会说服自己「选了就往前看」"}, {"key": "C", "text": "决定做了就翻篇，把精力放在怎么把选择变正确上"}, {"key": "D", "text": "决定了就不再回头看，相信自己在当时做了最好的选择"}, {"key": "E", "text": "决定了立刻执行，没时间回头看，错了就错了再改呗"}]}, {"id": 6, "text": "一个方案或作品，做到什么程度你才会交出去？", "options": [{"key": "A", "text": "必须做到120分，任何一个细节有瑕疵我都受不了"}, {"key": "B", "text": "核心部分必须完美，边缘细节可以适当放过自己"}, {"key": "C", "text": "80分就够用了，完美是效率最大的敌人"}, {"key": "D", "text": "能解决问题就行，Done is better than perfect"}, {"key": "E", "text": "差不多就交，不完美的地方后续再迭代优化"}]}, {"id": 7, "text": "当你精心准备的一个作品没有达到自己内心的标准，你的反应是？", "options": [{"key": "A", "text": "巨大的挫败感，甚至想把整个东西推倒重来"}, {"key": "B", "text": "很不舒服很不甘心，但会说服自己「完成比完美重要」，先交出去"}, {"key": "C", "text": "有点遗憾，但不影响继续往下推进"}, {"key": "D", "text": "没达到就没达到呗，下次注意就行，完美主义耽误正事"}, {"key": "E", "text": "不太在意，反正还有下一个作品，每次都比上次好就行"}]}, {"id": 8, "text": "听到「差不多就行了」「别那么较真」这类话，你内心的真实感受是？", "options": [{"key": "A", "text": "浑身不舒服——差不多在我眼里就是差很多"}, {"key": "B", "text": "在不重要的事情上可以接受，但在在乎的事情上不妥协"}, {"key": "C", "text": "觉得说得有道理，很多时候「够用」比「完美」更聪明"}, {"key": "D", "text": "这就是我的人生哲学——事事完美的结果就是事事完不成"}, {"key": "E", "text": "从不纠结「够不够好」，只问「能不能跑起来」"}]}, {"id": 9, "text": "你对于细节的执着程度，最接近以下哪种？", "options": [{"key": "A", "text": "魔鬼在细节里，任何不完美在我眼里都像眼中钉一样刺眼"}, {"key": "B", "text": "重要的事情抠细节，不重要的事情允许自己放水"}, {"key": "C", "text": "我更在乎整体效果和核心价值，细节可以慢慢优化"}, {"key": "D", "text": "能用就行，细节是给有闲的人准备的"}, {"key": "E", "text": "细节让在乎细节的人去管，我只管大方向"}]}, {"id": 10, "text": "如果有人在你的作品或成果中找到了一个小错误，你的反应是？", "options": [{"key": "A", "text": "羞愧到想原地消失，反复自责「怎么连这个都没想到」"}, {"key": "B", "text": "不高兴但马上改掉，在心里默默把这个检查项加到日后的清单里"}, {"key": "C", "text": "坦然承认然后修正——谁还没犯过错呢？"}, {"key": "D", "text": "感谢对方指出，然后继续干下一件事，不纠结"}, {"key": "E", "text": "改一下就好，有人帮找bug还省了我自己的时间"}]}, {"id": 11, "text": "刷朋友圈或小红书，看到同龄人或前同事晒升职/买房/结婚/暴富，你的内心是？", "options": [{"key": "A", "text": "焦虑感瞬间拉满——「别人都在往前跑，只有我在原地踏步」"}, {"key": "B", "text": "心里酸酸的、有点焦虑，但会提醒自己「每个人节奏不同」"}, {"key": "C", "text": "理性吃瓜——知道别人展示的都是精修版人生"}, {"key": "D", "text": "内心毫无波澜，别人的人生跟我有什么关系"}, {"key": "E", "text": "刷不到，我根本没时间看朋友圈"}]}, {"id": 12, "text": "社交媒体上那些「25岁年入百万」「30岁退休环游世界」的内容，对你的影响是？", "options": [{"key": "A", "text": "严重影响心态，看完觉得自己的努力一文不值，陷入深深的自我否定"}, {"key": "B", "text": "有波动但能调节，知道99%是包装出来的，但还是会忍不住比较"}, {"key": "C", "text": "偶尔会受影响，但很快就能识别这是幸存者偏差"}, {"key": "D", "text": "早就看透了这套叙事，要么不信，要么根本不会浪费时间看"}, {"key": "E", "text": "看到这种标题直接划走——有焦虑的时间不如多干点实事"}]}, {"id": 13, "text": "当你发现一个朋友在你最擅长的领域，做得比你还好时，你会？", "options": [{"key": "A", "text": "瞬间崩塌——「原来我根本没那么厉害，之前的自信全是错觉」"}, {"key": "B", "text": "有点不服气和焦虑，心里默默决定要加倍努力追回来"}, {"key": "C", "text": "欣赏对方但不自我贬低，每个人有自己的节奏和方向"}, {"key": "D", "text": "高兴地约对方吃饭取经——多好的学习对象啊！"}, {"key": "E", "text": "不太在意，比我强的人多了去了，我只关心自己有没有比昨天强"}]}, {"id": 14, "text": "看到身边有人拿到了你梦寐以求的offer或机会或成就，你脑子里第一个想法是？", "options": [{"key": "A", "text": "「为什么他能我不行？是不是我真的不如别人？」"}, {"key": "B", "text": "「羡慕但也没办法，运势和机遇这种事说不好的」"}, {"key": "C", "text": "「他做了什么达到的？有没有什么我可以学习的？」"}, {"key": "D", "text": "「挺好的，恭喜他。然后继续做我自己的事」"}, {"key": "E", "text": "「我要怎么做到——而且比他做得更好」"}]}, {"id": 15, "text": "从小到大，「别人家的孩子/同学/同事」对你的心理影响有多大？", "options": [{"key": "A", "text": "影响太大了，以至于我现在还在为「不够好」三个字买单"}, {"key": "B", "text": "有影响但努力在摆脱，虽然偶尔还是会掉进比较陷阱"}, {"key": "C", "text": "曾经有影响，但现在已经学会把注意力收回到自己身上"}, {"key": "D", "text": "几乎没影响，我从小就只跟昨天的自己比"}, {"key": "E", "text": "从来就懒得跟别人比，我只管自己的目标和速度"}]}, {"id": 16, "text": "突然决定要做一件事（比如健身/考证/副业），从「下定决心」到「真正开始动手」，通常要多久？", "options": [{"key": "A", "text": "想了半年甚至更久，一直在「搜集信息」「准备」「等一个好时机」"}, {"key": "B", "text": "准备好一阵子，经常都走到门口了又被自己劝退"}, {"key": "C", "text": "想好了就行动，不会让自己拖太久"}, {"key": "D", "text": "想到很快就动手，不会等太久"}, {"key": "E", "text": "想到当天就动手，干不了再调整方向"}]}, {"id": 17, "text": "你觉得自己很多时候迟迟不行动，最根本的原因是？", "options": [{"key": "A", "text": "太害怕做不好了——害怕失败、害怕被评价、害怕证明自己不行"}, {"key": "B", "text": "总觉得自己还没准备好——还需要再学点什么、再积累点什么"}, {"key": "C", "text": "偶尔会拖延，但总能找到办法把自己推出去"}, {"key": "D", "text": "我不怎么拖延，想做的事很快就去做了"}, {"key": "E", "text": "拖延？不存在的。我只怕自己跑得不够快"}]}, {"id": 18, "text": "当你手头同时有好几件事要做，但又都不太想做的时候，你会？", "options": [{"key": "A", "text": "大脑直接死机，哪个都做不了，开始刷手机转移注意力"}, {"key": "B", "text": "很焦虑但能强迫自己先挑一个简单的开始"}, {"key": "C", "text": "快速排个优先级，一个一个来解决"}, {"key": "D", "text": "挑最重要的直接开干，不需要什么心理建设"}, {"key": "E", "text": "全都不想做就都不做，等有状态了再一口气搞定"}]}, {"id": 19, "text": "面对一个比较大、比较难的目标时，你更接近以下哪种状态？", "options": [{"key": "A", "text": "还没开始就已经在心里预演了100种失败场景，直接瘫痪"}, {"key": "B", "text": "需要花很多时间做心理建设，内心戏演完才能迈出第一步"}, {"key": "C", "text": "会做一些准备和规划，但不会让「准备」变成「拖延」"}, {"key": "D", "text": "不太需要心理建设，想清楚了就开干"}, {"key": "E", "text": "不管难不难，先干它一个月看看效果再说"}]}, {"id": 20, "text": "「下次再说」「等准备好了再开始」「现在时机不太对」——这些台词在你生活中出现的频率是？", "options": [{"key": "A", "text": "高频出现，简直是我的口头禅，说多了连自己都信了"}, {"key": "B", "text": "经常出现，每次都觉得是「真诚的理由」，后来发现都是拖延"}, {"key": "C", "text": "偶尔出现，但我能识别出来这是「拖延症发作了」的信号"}, {"key": "D", "text": "很少出现，我不太给自己找这种借口"}, {"key": "E", "text": "几乎不说这些话，说干就干是我的风格"}]}], "resultTypes": {"A": {"name": "🔴 重度内耗型", "subtitle": "你的大脑是一台24小时不关机的耗电怪兽", "maturityScore": 38, "indices": [{"label": "自我怀疑指数", "value": 92}, {"label": "完美主义倾向", "value": 90}, {"label": "行动障碍度", "value": 91}], "diagnosis": "你每天至少有一半的精力不是用来做事，而是用来跟自己打架。别人的一句话、一个眼神都能在你脑子里发酵三天。你做一件事之前需要大量的心理建设，做完之后需要更大量的自我审判。你的内在批评家声音太大了，大到盖过了你内心真正的渴望。你总是在「想太多」和「做太少」之间反复拉扯，这种拉扯本身就是最大的消耗源。好消息是：当你意识到这是「内耗」而不是「你不行」的时候，治愈就已经开始了。你不是能力不够，你是被自己的内心噪音消耗了太多能量。学会区分「有用的反思」和「无用的反刍」，是你最重要的成长课题。", "radarData": [{"label": "自我接纳", "value": 22}, {"label": "情绪稳定", "value": 18}, {"label": "比较免疫", "value": 16}, {"label": "行动效率", "value": 20}, {"label": "心理弹性", "value": 25}], "suitableJobs": ["需要深度思考的创作型工作", "可以独立完成、节奏可控的岗位", "心理咨询/疗愈类工作", "研究型/分析型岗位"], "unsuitableJobs": ["高压销售/高频应酬岗位", "需要快速决策和持续输出的管理岗", "竞争激烈且需要频繁社交的行业"], "pathCompare": {"good": "顺应天赋：接纳自己是高敏感体质的事实，把「想太多」转化为「想得深」的优势。建立自己的心理防护机制，学会区分「有用的反思」和「无用的反刍」。用写作、冥想等方式给大脑找一个出口。", "bad": "逆天赋：继续和自己较劲——「为什么我就不能像别人那样洒脱？」——这种自我攻击恰恰是新一轮内耗的开始。或者用工作狂的方式麻痹自己，直到彻底burnout。"}, "plan90": ["第1-30天：开始写「内耗日记」——每天花5分钟记录：今天我在哪件事上消耗了自己？这件事真的值得这些能量吗？觉察是改变的第一步。", "第31-60天：练习「5分钟法则」——想做一件事但纠结时，告诉自己只做5分钟，5分钟后可以放弃。用行动打断思维循环。建立你的「心理急救包」——列出3件能让你快速从内耗中抽离的事情。", "第61-90天：培养一个不需要大脑参与的「锚点活动」（运动/手工/园艺），每天至少20分钟让大脑强制休息。尝试每周做一件「60分就交」的小事，体验不完美的安全。"], "closing": "你不是玻璃心，你只是心灵的触角比别人更敏锐。这种敏感如果用对了地方，就是共情力、创造力和洞察力的来源。从今天开始，不再攻击自己「想太多」，而是温柔地引导自己「想想怎么行动」。", "posterText": "我是重度内耗型选手", "posterSubtext": "大脑24小时不关机，每天跟自己打一场没有硝烟的战争"}, "B": {"name": "🟠 中度内耗型", "subtitle": "偶尔掉进内耗的坑，但还能自己爬出来", "maturityScore": 58, "indices": [{"label": "自我怀疑指数", "value": 72}, {"label": "完美主义倾向", "value": 70}, {"label": "情绪消耗值", "value": 73}], "diagnosis": "你属于「间歇性内耗」选手——平时看着挺正常，但一旦踩到某个情绪trigger，内心的小剧场就立刻开演。好消息是：你有自我觉察能力，知道自己在内耗，而且大多数时候能靠自己爬出来。坏消息是：内耗来的时候还是挺难受的，而且你有时候分不清「合理反思」和「过度内耗」的边界。你会在特定的场景反复掉进同一个坑——比如被领导批评之后、看到同行超越自己之后、或者面对一个重大选择的时候。你的成长方向不是「完全消灭内耗」，而是缩短每次内耗的时长，降低它的频率，并且建立一套可靠的「内耗应急预案」。", "radarData": [{"label": "自我接纳", "value": 48}, {"label": "情绪稳定", "value": 44}, {"label": "比较免疫", "value": 46}, {"label": "行动效率", "value": 50}, {"label": "心理弹性", "value": 48}], "suitableJobs": ["需要平衡创造力和执行力的岗位", "项目制/周期性工作（忙时冲、闲时养）", "有一定自主权但不完全独立的工作", "创意与落地相结合的职业"], "unsuitableJobs": ["高压、快节奏、容错率极低的环境", "长期独自承担重大决策的岗位", "人际关系极其复杂的办公室政治重灾区"], "pathCompare": {"good": "顺应天赋：识别自己的情绪trigger，建立一套「内耗应急预案」。当发现自己开始循环播放内心小剧场时，启动预设的打断机制。把内耗当作一个信号——它在告诉你某件事需要被处理了。", "bad": "逆天赋：对内耗不设防——每次都让情绪自由发挥，每次都要经历「痛苦-挣扎-自我安慰-回归正常」的完整周期，耗费大量时间和能量。"}, "plan90": ["第1-30天：梳理你的「内耗触发器」——什么场景/什么话/什么事最容易让你开始内心小剧场？列一个清单。每个trigger背后是什么深层恐惧？", "第31-60天：为每个触发器设计一个「打断动作」——比如立刻站起来喝杯水、给朋友发个消息、或者大声对自己说「停！又在想了！」。练习「60分钟法则」：任何让你内耗的事，给自己60分钟的处理时间，超时就强制翻篇。", "第61-90天：记录每次内耗的持续时长，争取每次都比上一次少用一点时间恢复。建立「内耗防弹衣」——保护好你的高能量时段，把重要的事放在不容易内耗的时段做。"], "closing": "内耗最怕的不是意志力，而是觉察力。当你能够旁观自己的情绪，而不是被它吞没的时候，你就已经赢了一大半。你的内耗不会消失，但它会越来越短、越来越浅。", "posterText": "我是中度内耗型选手", "posterSubtext": "间歇性陷入内心剧场，但好在每次都能自己爬出来"}, "C": {"name": "🟡 轻度内耗型", "subtitle": "总体内核平稳，偶尔的自我怀疑只是调味剂", "maturityScore": 74, "indices": [{"label": "自我接纳度", "value": 70}, {"label": "比较免疫力", "value": 73}, {"label": "情绪恢复力", "value": 76}], "diagnosis": "恭喜你，你的精神内耗处于健康区间。你偶尔也会自我怀疑、也会拖延、也会被别人的成功酸到——但这些都是正常的人类情绪，不会对你的生活质量造成实质影响。你有一定的情绪调节能力，知道什么时候该较真、什么时候该放过自己。你不会被一次的失败定义，也不会让别人的评价左右你太久。你的状态是很多人羡慕和努力的方向：不麻木也不过度敏感，不躺平也不内卷。偶尔的内耗对你来说更像是身体的预警信号——它提醒你该休息了、该调整了、或者该做某个一直回避的决定。继续保持这个节奏就很好了。", "radarData": [{"label": "自我接纳", "value": 72}, {"label": "情绪稳定", "value": 74}, {"label": "比较免疫", "value": 70}, {"label": "行动效率", "value": 68}, {"label": "心理弹性", "value": 75}], "suitableJobs": ["大多数正常环境的职业你都能适应", "需要平衡理性和感性的岗位", "有成长空间但没有过度内卷的团队", "能发挥主动性但不过度消耗的职位"], "unsuitableJobs": ["极度高压的996/007环境", "容错率为零的极端岗位", "长期需要伪装自己迎合他人的工作"], "pathCompare": {"good": "顺应天赋：保持现有的自我觉察习惯，偶尔的内耗可以成为你自我反思和进步的动力。注意定期给自己做心理体检，防患于未然。帮助身边正在内耗的朋友，教别人是最好的学习。", "bad": "逆天赋：觉得自己「内耗很轻」就开始忽视心理健康，积累的小情绪没有得到及时处理，某一天因为一个导火索集中爆发。或者开始judge那些内耗重的人「矫情」，失去共情力。"}, "plan90": ["第1-30天：做一次全面的「情绪审计」——过去三个月什么事让你最开心/最焦虑？找到你的情绪地图。梳理出让你偶尔内耗的小trigger，提前做好防护。", "第31-60天：优化你的精力管理——保护好你的「高能量时段」，把重要的事放在这些时段做。尝试帮助身边一个正在内耗的朋友，用自己的经验帮别人。", "第61-90天：给自己设定一个小挑战——做一件你一直想做但觉得「有点难」的事。用你健康的内核去推动它，同时观察这个过程是否会产生过度内耗。"], "closing": "你的内心戏不多不少，刚刚好。能反思但不反刍，会犹豫但不瘫痪。在这个人人都在内耗的时代，你的状态就是一种稀缺的超能力。保持住。", "posterText": "我是轻度内耗型选手", "posterSubtext": "偶尔跟自己较劲，但大多数时候能和自己和平相处"}, "D": {"name": "🟢 内核稳定型", "subtitle": "内心有一根定海神针，外界风雨很难动摇你", "maturityScore": 91, "indices": [{"label": "自我接纳度", "value": 92}, {"label": "比较免疫力", "value": 94}, {"label": "情绪恢复力", "value": 92}], "diagnosis": "你就是别人口中的「内核稳得一批」的那种人。你不是没有情绪，而是你有处理情绪的成熟系统。你知道自己是谁、要什么、不要什么——这种清晰的自我认知让你很少被外界的噪音带跑。别人在比较中焦虑的时候你在专注做事，别人在反复纠结的时候你已经在行动和迭代。这种「不内耗」的能力，是你所有能力中最被低估但价值最高的一项。你不需要外界的认可来确认自己的价值，也不会因为一次挫折就全盘否定自己。保护好这个内核，它会成为你人生最大的杠杆——让你在关键决策时比别人更快、更准、更稳。", "radarData": [{"label": "自我接纳", "value": 93}, {"label": "情绪稳定", "value": 91}, {"label": "比较免疫", "value": 94}, {"label": "行动效率", "value": 88}, {"label": "心理弹性", "value": 90}], "suitableJobs": ["需要独立判断和稳定输出的领导岗位", "需要长期投入和耐心的战略性工作", "高压环境下的关键决策者", "需要成为团队主心骨的角色"], "unsuitableJobs": ["需要频繁伪装自己、违背价值观的岗位", "人际关系极其混乱和消耗的泥潭式环境", "纯执行、毫无自主权的螺丝钉工作"], "pathCompare": {"good": "顺应天赋：用你稳定的内核去影响和帮助身边的人。你的不内耗如果能转化为团队的凝聚力和方向感，你就是最好的领导者。把多余的心理能量投入到创造和行动中去。", "bad": "逆天赋：因为自己内核稳定就觉得别人「想太多」「太矫情」，失去共情能力。过度理性也可能让你忽略自己内心的真实感受，积压到某一天才爆发。或者因为太稳而失去紧迫感，错过了本可以抓住的机会。"}, "plan90": ["第1-30天：梳理你保持内核稳定的秘诀——是哪些习惯/信念/方法让你能做到不内耗？把它们写下来形成体系。这套方法论对很多人来说是救命稻草。", "第31-60天：用你的稳定内核帮助至少2个正在内耗的朋友或同事，做他们的「定心丸」。在帮助别人的过程中，你会更清晰地看见自己的优势。", "第61-90天：挑战一个你已经想了很久但之前觉得「还没准备好」的大目标——你的内核稳定不是为了安逸，而是为了大胆行动。稳定是最好的跳板。"], "closing": "在这个人人都在和自己打仗的时代，你的内心宁静是比任何技能都稀缺的资产。把它变成你的超能力——用它去创造、去引领、去成为你想成为的那个人。", "posterText": "我是内核稳定型选手", "posterSubtext": "内心有根定海神针，外面风雨再大也扰不了我的节奏"}, "E": {"name": "⚡ 行动导向型", "subtitle": "想太多不如做起来，你的字典里没有「内耗」两个字", "maturityScore": 86, "indices": [{"label": "行动果断力", "value": 94}, {"label": "内心噪音过滤", "value": 91}, {"label": "目标专注度", "value": 89}], "diagnosis": "内耗？不存在的。你是那种「管他三七二十一，先干了再说」的人。你觉得花在纠结上的每一分钟都应该用来行动。你不会反复回放过去的事，也不会过度预设未来的困难——你只关注「现在我能做什么」。你周围的内耗型朋友羡慕死你了。你处理情绪的方式简单粗暴：与其想来想去，不如动起来。行动本身就是你最好的解药——一旦开始做了，焦虑自动消失。但有一个小小的提醒：有时候稍微停一下想想方向，可能比你一直往前冲效率更高。你不是不需要反思，而是你的反思要在行动中完成。偶尔的「战略暂停」不是内耗，是校准。", "radarData": [{"label": "自我接纳", "value": 86}, {"label": "情绪稳定", "value": 84}, {"label": "比较免疫", "value": 90}, {"label": "行动效率", "value": 95}, {"label": "心理弹性", "value": 82}], "suitableJobs": ["需要快速执行和迭代的创业/业务岗", "高节奏、结果导向的销售/运营", "需要快速响应和决策的一线管理岗", "从0到1的开创型项目"], "unsuitableJobs": ["需要极度耐心和细节打磨的工作", "长期没有反馈和结果的研发型岗位", "流程繁琐、审批漫长的体制内岗位"], "pathCompare": {"good": "顺应天赋：发挥你的行动优势，用快速试错代替反复思考。同时找一个能帮你做深度思考的搭档，你的「干」加上他的「想」就是最佳组合。给自己设定每周30分钟的「战略暂停」时间。", "bad": "逆天赋：过于排斥任何形式的「停下来想一想」，在错误的道路上一路狂奔。或者因为太快而忽略了重要的细节和风险，最后因为可以避免的错误翻车。"}, "plan90": ["第1-30天：给自己设置一个每周「30分钟战略暂停」——不是内耗式纠结，而是有意识地复盘方向对不对。当前最重要目标是什么？你的时间是否花在了正确的事情上？", "第31-60天：用你的行动力猛攻当前最重要的目标，看看能冲到什么程度。同时观察：有没有什么重要的细节或风险被你忽略了？", "第61-90天：找一个和你互补的「思考型」伙伴，你做执行先锋，他做战略参谋，看看1+1能不能大于2。学会在「冲」之前花10分钟想清楚方向。"], "closing": "在这个「人人都在内耗」的时代，你的行动力是绝对的稀缺资产。但不代表你不需要偶尔停下来校准方向。最好的状态是：想了就做，做了再想，循环往复，螺旋上升。", "posterText": "我是行动导向型选手", "posterSubtext": "内耗这个词在我的字典里查不到，干就完了"}}, "loadingMessages": ["正在扫描你的内心消耗模式...", "检测自我怀疑信号...", "评估完美主义倾向...", "计算比较敏感度...", "诊断行动障碍指数...", "分析情绪消耗模式...", "生成专属内耗报告..."], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "内耗指数"}, "mixedNotes": {"A+B": "你的内耗在重度与中度之间摇摆，可能在某些领域（比如工作）高度内耗，在另一些领域相对放松。建议先处理最消耗你的那一个领域，用单点突破的方式逐步降低整体内耗水平。", "A+C": "你处于内耗的「临界高危区」——大部分时候看起来正常，但一旦触发就很容易滑向重度内耗。关键是识别从「轻度」到「重度」的临界点，在滑下去之前拉自己一把。", "A+D": "一个很有意思的组合——你内心拥有稳定的内核，但在特定trigger下会突然陷入重度内耗。这说明你的内耗不是常态而是应激反应。找到这些trigger并提前做好防护，你的内核会越来越稳定。", "A+E": "你在「想太多而瘫痪」和「管它呢先干了」之间两极摇摆。有时候过度思虑让你动不了，有时候又突然冲动行动。学会在两者之间找到平衡——想够了就动，动完了再想。", "B+C": "你处于内耗的「临界区间」——多数时候还好，但离「启动内耗模式」只有一步之遥。关键是要建立快速识别和打断机制，别让一次小内耗演变成持续数日的精神消耗战。", "B+D": "总体上你的内核是比较稳定的，但偶尔会有中度内耗的波动。这说明你有良好的情绪基础，只是某些特定场景会暂时打破平衡。你的恢复速度是关键优势——继续保持。", "B+E": "你在「行动派」和「思考派」之间找到了一个不错的平衡。偶尔的内耗不会让你卡住太久，因为你的行动本能会帮你打破僵局。这是一个很健康的组合。", "C+D": "你的内心总体比较稳定，这非常难得。偶尔的轻度内耗是你保持清醒和自我反思的信号，而不是问题本身。继续保持这个状态，你已经比绝大多数人更自在了。", "C+E": "你的内耗很轻，行动力又强——这是一个相当理想的状态。偶尔的自我怀疑不会拖慢你的步伐，你会先行动再反思。注意：有时候稍微多花一点时间思考，你的行动会更精准。", "D+E": "你是「反内耗」天花板——内核稳定加上超强行动力，你几乎把所有心理能量都用在了创造和前进上。你的存在就是对内耗型朋友最好的鼓励：原来人生可以不跟自己打架。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

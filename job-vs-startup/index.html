@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>你适合上班还是创业？</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "你适合上班还是创业？", "subtitle": "20题精准判断你该打工还是当老板", "description": "一次测试看清你的职业宿命。决策风格、风险承受、独立意愿、结果导向——四个维度精准画像，告诉你最适合当打工人、创业者还是自由职业者。", "keywords": "创业测试,职业规划,上班还是创业,职业性格测试,打工还是当老板", "primaryColor": "#d4784a", "ogImage": ""}, "home": {"title": "你适合上班还是创业？", "subtitle": "20题精准判断你该打工还是当老板", "introHTML": "<p>你是不是也经常在深夜反复横跳：<strong>「我到底是该老老实实上班，还是该豁出去创业？」</strong></p><p>朋友圈里有人在纳斯达克敲钟，有人在工位上摸鱼等下班。而你卡在中间，不知道往哪走。</p><p>这个测试从<strong>决策风格、风险承受、独立意愿、结果导向</strong>四个维度，帮你搞清楚：你的底层代码到底是为打工写的，还是为创业写的。</p><p>别猜了，测完你就知道了。</p>", "btnText": "开始测试", "disclaimer": "本测试仅供娱乐参考，人生选择请结合实际情况综合判断。"}, "dimensions": [{"name": "决策风格", "icon": "🧠", "questionIds": [1, 2, 3, 4, 5]}, {"name": "风险承受", "icon": "🎲", "questionIds": [6, 7, 8, 9, 10]}, {"name": "独立意愿", "icon": "🦅", "questionIds": [11, 12, 13, 14, 15]}, {"name": "结果导向", "icon": "🎯", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "当你要做一个重要决定时，你通常会？", "options": [{"key": "A", "text": "快速拍板，先干了再说"}, {"key": "B", "text": "收集足够信息，反复权衡后决定"}, {"key": "C", "text": "先小范围试试水，看反馈再定"}, {"key": "D", "text": "找信任的人商量，综合意见后决定"}, {"key": "E", "text": "相信直觉，跟着感觉走"}]}, {"id": 2, "text": "面对一个完全陌生的领域，你的第一反应是？", "options": [{"key": "A", "text": "兴奋——这又是一个新机会"}, {"key": "B", "text": "谨慎——先搞清楚规则再行动"}, {"key": "C", "text": "好奇——但不是现在，先把手头的事做好"}, {"key": "D", "text": "观望——看看别人怎么做再说"}, {"key": "E", "text": "冲动——立刻开始研究怎么切入"}]}, {"id": 3, "text": "项目方向突然需要180度大转弯，你的反应是？", "options": [{"key": "A", "text": "立刻调头，甚至有点兴奋"}, {"key": "B", "text": "先评估成本和收益，再做决定"}, {"key": "C", "text": "心里打鼓，但会跟着调整"}, {"key": "D", "text": "需要和团队充分讨论后才能接受"}, {"key": "E", "text": "不管了，先冲过去试试看"}]}, {"id": 4, "text": "手里同时有五个任务在推进，你倾向于？", "options": [{"key": "A", "text": "全都自己抓，不喜欢依赖别人"}, {"key": "B", "text": "按优先级排序，逐个击破"}, {"key": "C", "text": "能分出去的分出去，自己盯关键节点"}, {"key": "D", "text": "拉个群同步进度，靠团队协作"}, {"key": "E", "text": "挑最感兴趣的先做，剩下的随缘"}]}, {"id": 5, "text": "做决策时，你更相信什么？", "options": [{"key": "A", "text": "自己的判断，哪怕所有人反对"}, {"key": "B", "text": "数据和逻辑，不能被情绪左右"}, {"key": "C", "text": "既有自己的判断，也会参考外部反馈"}, {"key": "D", "text": "更多依赖团队共识和专家意见"}, {"key": "E", "text": "直觉和灵感，理性分析太慢了"}]}, {"id": 6, "text": "有一个机会可能让你收入翻倍，但也有50%概率失败，你会？", "options": [{"key": "A", "text": "干！50%已经很高了"}, {"key": "B", "text": "算一下期望值，如果不亏就上"}, {"key": "C", "text": "太冒险了，我选稳一点的路"}, {"key": "D", "text": "找个合伙人分摊风险一起干"}, {"key": "E", "text": "不管概率，先小成本试一下"}]}, {"id": 7, "text": "一份「稳定但一眼望到头」的工作，你怎么看？", "options": [{"key": "A", "text": "简直是噩梦，我待不住"}, {"key": "B", "text": "可以接受，但会在业余时间找别的可能性"}, {"key": "C", "text": "挺好啊，稳定本身就是一种价值"}, {"key": "D", "text": "可以接受，前提是收入足够高"}, {"key": "E", "text": "不确定，我可能会无聊但又不敢走"}]}, {"id": 8, "text": "关于投资理财，你更接近哪种风格？", "options": [{"key": "A", "text": "激进型——高收益高风险才刺激"}, {"key": "B", "text": "均衡型——分散配置，稳稳增值"}, {"key": "C", "text": "保守型——本金安全是第一位的"}, {"key": "D", "text": "学习型——先研究透再下手"}, {"key": "E", "text": "随缘型——想到就买，忘了就算了"}]}, {"id": 9, "text": "面对不确定的未来，你内心的状态更接近？", "options": [{"key": "A", "text": "充满期待，不确定性就是机会"}, {"key": "B", "text": "有点焦虑但还能应对"}, {"key": "C", "text": "感到不安，希望有更多确定性"}, {"key": "D", "text": "理性看待，做好预案就行"}, {"key": "E", "text": "没想太多，走一步看一步"}]}, {"id": 10, "text": "如果全职创业意味着需要花掉你所有的积蓄，你愿意吗？", "options": [{"key": "A", "text": "愿意，不破不立"}, {"key": "B", "text": "需要看到清晰的盈利模型才愿意"}, {"key": "C", "text": "不愿意，安全感对我很重要"}, {"key": "D", "text": "愿意一部分，但不会 ALL IN"}, {"key": "E", "text": "嘴上说愿意，真到那一刻可能会退缩"}]}, {"id": 11, "text": "在工作方式上，你更偏好？", "options": [{"key": "A", "text": "完全自主——我的地盘我做主"}, {"key": "B", "text": "有框架的自由——在规则内发挥"}, {"key": "C", "text": "有人带——有方向感才安心"}, {"key": "D", "text": "搭档模式——有人配合最好"}, {"key": "E", "text": "无所谓——只要事情有意思就行"}]}, {"id": 12, "text": "当老板或上级对你的工作方式指手画脚时，你的感受是？", "options": [{"key": "A", "text": "非常不爽，甚至有辞职的冲动"}, {"key": "B", "text": "能理解，但希望有一定的自主空间"}, {"key": "C", "text": "习惯了，人家是老板说了算"}, {"key": "D", "text": "会沟通，但最终服从安排"}, {"key": "E", "text": "表面配合，私下还是按自己的来"}]}, {"id": 13, "text": "你理想的工作日是怎样的？", "options": [{"key": "A", "text": "自己定节奏，想什么时候干活就什么时候干"}, {"key": "B", "text": "有一定弹性，但核心时间段保持高效"}, {"key": "C", "text": "朝九晚五，下班后完全属于自己的时间"}, {"key": "D", "text": "和志同道合的人一起工作，氛围很重要"}, {"key": "E", "text": "看心情，今天高效明天摸鱼也可以"}]}, {"id": 14, "text": "你希望你的收入主要由什么决定？", "options": [{"key": "A", "text": "由我创造的价值决定，上不封顶"}, {"key": "B", "text": "底薪+绩效，有一定浮动空间"}, {"key": "C", "text": "稳定月薪，不用为下个月的收入焦虑"}, {"key": "D", "text": "底薪+分成，共享成果也共担风险"}, {"key": "E", "text": "不固定也行，但希望有多元收入来源"}]}, {"id": 15, "text": "当你脑子里冒出一个很酷的新想法时，你通常会？", "options": [{"key": "A", "text": "立刻开始动手验证，等不及了"}, {"key": "B", "text": "先做调研，确认可行性再行动"}, {"key": "C", "text": "记下来，等有空了再研究"}, {"key": "D", "text": "找朋友聊一聊，听听反馈"}, {"key": "E", "text": "想三天就忘了，下一个想法更香"}]}, {"id": 16, "text": "你觉得一个人工作能力的核心衡量标准是？", "options": [{"key": "A", "text": "拿到了什么结果，而不是做了什么"}, {"key": "B", "text": "过程和结果都要看，综合评估"}, {"key": "C", "text": "能力强弱要看具体情境"}, {"key": "D", "text": "团队的认可和业绩达标"}, {"key": "E", "text": "看心情，很难用一个标准衡量"}]}, {"id": 17, "text": "项目进展不如预期时，你最先想到的是什么？", "options": [{"key": "A", "text": "哪里出了问题？怎么快速修正？"}, {"key": "B", "text": "复盘分析，找到根因再调整"}, {"key": "C", "text": "是不是自己能力不够？"}, {"key": "D", "text": "和团队一起找原因，共同解决"}, {"key": "E", "text": "心态有点崩，需要缓一缓"}]}, {"id": 18, "text": "「努力了就好，结果不重要」这句话你怎么看？", "options": [{"key": "A", "text": "纯属自我安慰——结果才是硬道理"}, {"key": "B", "text": "有一定道理，但结果还是要看的"}, {"key": "C", "text": "认同，过程本身就有价值"}, {"key": "D", "text": "看情况，有些事确实不能只看结果"}, {"key": "E", "text": "嘴上认可，心里还是在意结果"}]}, {"id": 19, "text": "如果团队里有人明显拖了后腿，你会怎么做？", "options": [{"key": "A", "text": "直接提出来，不行就换人"}, {"key": "B", "text": "先沟通了解原因，再决定怎么处理"}, {"key": "C", "text": "心里不爽但不想得罪人"}, {"key": "D", "text": "找上级反映，让上面来处理"}, {"key": "E", "text": "自己多干点算了，懒得折腾"}]}, {"id": 20, "text": "你最不能接受以下哪种工作状态？", "options": [{"key": "A", "text": "努力了但没有结果"}, {"key": "B", "text": "方向不清晰，不知道在为什么努力"}, {"key": "C", "text": "被持续否定和打压"}, {"key": "D", "text": "团队不配合，一个人孤军奋战"}, {"key": "E", "text": "重复机械劳动，没有任何成长"}]}], "resultTypes": {"A": {"name": "🚀 创业型", "subtitle": "你骨子里流淌的是创业者的血", "maturityScore": 88, "indices": [{"label": "决策果敢度", "value": 92}, {"label": "风险偏好度", "value": 88}, {"label": "自主驱动力", "value": 85}], "diagnosis": "你不是那种能在工位上安安稳稳坐三年的人。你骨子里有一种强烈的「我要自己说了算」的冲动。别人看到不确定性会焦虑，而你看到的是满地机会。你享受从零到一的过程，享受自己亲手搭建一个系统的快感。你不一定是胆子最大的，但你绝对是行动最快的——「先干了再说」是你的默认设置。对你来说，上班最大的痛苦不是工作本身，而是「被安排」的窒息感。你的底层代码就是为创业而写的：你习惯自己做决定，愿意承担后果，而且对结果极度执着。这种人，迟早要自己干的。", "radarData": [{"label": "决策风格", "value": 92}, {"label": "风险承受", "value": 88}, {"label": "独立意愿", "value": 95}, {"label": "结果导向", "value": 85}, {"label": "团队协作", "value": 45}], "suitableJobs": ["独立创业者", "初创公司创始人", "个体户/品牌主理人", "连续创业者"], "unsuitableJobs": ["大型企业中层管理", "公务员/事业编", "流水线型岗位"], "pathCompare": {"good": "顺应天赋：尽早启动创业项目，哪怕从小生意开始。你适合做独立决策者，选择轻资产、快迭代的模式，充分发挥你「先开枪后瞄准」的优势。", "bad": "逆天赋：继续在大公司熬资历，你会越来越焦虑，频繁跳槽但始终找不到归属感。你的能量会在「等待审批」和「开会扯皮」中消耗殆尽。"}, "plan90": ["第1-30天：确定创业方向，完成最小可行性产品的构思。每天和至少一个目标用户聊需求，验证你的假设。同时做好财务安全垫——先存好至少半年的生活费。", "第31-60天：启动MVP测试，获得第一批真实用户反馈。同步搭建你的个人品牌和社交媒体，开始积累行业影响力。找到至少三个行业内的前辈作为mentor。", "第61-90天：根据反馈迭代产品或服务，启动正式运营。建立财务追踪系统，设定清晰的营收里程碑。评估是否需要融资或引入合伙人。"], "closing": "你不是那种能在笼子里唱歌的鸟。飞出去吧，天空才是你的上限。", "posterText": "你骨子里流的是创业者的血", "posterSubtext": "别等准备好了再出发，创业从来都是边走边学"}, "B": {"name": "🏢 上班型", "subtitle": "平台就是你的翅膀，别被「创业至上」洗脑了", "maturityScore": 82, "indices": [{"label": "系统思维", "value": 90}, {"label": "稳定偏好", "value": 85}, {"label": "团队协作力", "value": 88}], "diagnosis": "恭喜你，你绝对不是「不适合创业」——你是在组织里能发挥最大价值的那类人。你擅长在既有框架里把事情做到极致，你享受团队协作带来的安全感和成就感。别人觉得打工是「被剥削」，而你知道在一个好的平台上，你的成长速度和资源杠杆可能比单打独斗快得多。你理性、稳健、注重数据和逻辑，不轻易被冲动裹挟。你最适合的是找到一家高速增长的公司，把自己变成核心骨干甚至拿到股权——「打工皇帝」这个词就是为你准备的。不是所有人都需要创业，有时候，站在巨人的肩膀上才是最优解。", "radarData": [{"label": "决策风格", "value": 55}, {"label": "风险承受", "value": 30}, {"label": "独立意愿", "value": 40}, {"label": "结果导向", "value": 78}, {"label": "团队协作", "value": 92}], "suitableJobs": ["大厂核心业务负责人", "金融机构高管", "咨询公司合伙人", "企业战略/运营总监"], "unsuitableJobs": ["独立创业", "自由职业接单", "零底薪纯佣金销售"], "pathCompare": {"good": "顺应天赋：选择一家成长型公司的核心岗位，深耕一个赛道做到头部。利用平台资源和团队杠杆放大你的产出，争取股权激励——让别人为你的判断力买单。", "bad": "逆天赋：被「创业神话」裹挟盲目下海，你会发现没有体系支撑、没有团队配合，你的优势完全使不上劲，反而会陷入深深的自我怀疑。"}, "plan90": ["第1-30天：梳理你当前所在行业的核心价值链，找到最值得深耕的方向。更新简历，主动联系3-5个行业猎头或前辈，了解市场对你这类人才的定价。", "第31-60天：选择一个能给你最大杠杆的平台（大厂/独角兽/成长型公司），重点投递。面试时不要只谈薪资，要谈成长空间和股权激励——你是来做半个合伙人的。", "第61-90天：入职后快速建立你的专业壁垒，成为团队里某个细分领域的唯一解答。同时建立跨部门人脉，让自己不可替代。"], "closing": "打工不丢人，在好平台上把事做漂亮，你比很多创业者赚得都多。", "posterText": "你的舞台不在街头，在一流的组织里", "posterSubtext": "找到对的平台，比一个人瞎闯重要一百倍"}, "C": {"name": "🌉 过渡型", "subtitle": "最好的路：先站稳脚跟，再慢慢过桥", "maturityScore": 80, "indices": [{"label": "平衡能力", "value": 88}, {"label": "适应性", "value": 85}, {"label": "务实精神", "value": 82}], "diagnosis": "你是夹在「上班不甘心」和「创业不敢冲」中间的那群人——但这其实是一种优势，不是缺陷。你对风险有清醒的认知，不会头脑发热裸辞，但你心里那个小火苗又一直没有灭。你这种人最适合走「过渡路线」：先保住主业的基本盘，在业余时间启动一个低成本副业，用最小的试错成本去验证你的想法。等到副业收入能覆盖你生活开支的一半以上，再考虑全职切换。你不是胆小鬼，你只是比那些冲动型创业者多了一份理性——而这恰恰能帮你活得更久，走得更远。", "radarData": [{"label": "决策风格", "value": 65}, {"label": "风险承受", "value": 55}, {"label": "独立意愿", "value": 68}, {"label": "结果导向", "value": 70}, {"label": "团队协作", "value": 72}], "suitableJobs": ["副业创业者", "企业内部创新负责人", "自由职业者（有主业保底）", "小型电商/内容创作者"], "unsuitableJobs": ["ALL IN型创业", "纯体力劳动型自由职业", "躺平型岗位"], "pathCompare": {"good": "顺应天赋：白天做好本职工作维持现金流，晚上和周末投入副业。选择轻资产、可规模化、不需要24小时盯着的赛道。给自己设定一个具体的「过渡触发点」——比如副业月入过万就考虑全职。", "bad": "逆天赋：要么冲动裸辞后陷入现金流焦虑，要么彻底放弃创业念头安心打工——这两种极端都不适合你，你会一直后悔。"}, "plan90": ["第1-30天：选定副业方向（建议选择你主业相关的延伸领域或你真正热爱的方向）。每天挤出2小时投入，先别想赚钱，先建立最小可行闭环。注册社交媒体账号开始输出内容。", "第31-60天：获得第一个付费客户或第一笔订单。记录你的时间投入和收入数据，客观评估这件事的ROI。同步优化主业效率，减少加班时间，为副业腾出更多精力。", "第61-90天：根据数据判断是否值得继续投入。如果方向正确，开始系统化运营；如果需要调整，及时转向。设定半年的过渡目标，正式计算「全职切换」的倒计时。"], "closing": "不需要裸辞去追梦，稳扎稳打过桥的人，往往走得更远。", "posterText": "别急着辞职，也别放弃梦想", "posterSubtext": "最好的过渡，是主业不丢、副业开花"}, "D": {"name": "🤝 合伙型", "subtitle": "你不是不够强，你只是需要一个互补的人", "maturityScore": 83, "indices": [{"label": "协作能力", "value": 92}, {"label": "互补意识", "value": 88}, {"label": "风险分担", "value": 80}], "diagnosis": "很多创业神话都在鼓吹「一个人就是一支队伍」，但你很清楚自己不是那种全能型选手——而且这完全没问题。你最强的能力不是单打独斗，而是找到对的人一起干。你擅长沟通、协调、建立信任，你天然能吸引到那些和你技能互补的人。你可能需要一个敢冲敢打的「先锋型」合伙人，也可能需要一个稳健理性的「军师型」搭档。你不是不能创业，你只是需要一个对的合伙人。记住：阿里巴巴有十八罗汉，腾讯有五虎将——真正的大事业，从来不是一个人干的。", "radarData": [{"label": "决策风格", "value": 60}, {"label": "风险承受", "value": 50}, {"label": "独立意愿", "value": 55}, {"label": "结果导向", "value": 72}, {"label": "团队协作", "value": 95}], "suitableJobs": ["联合创始人/合伙人", "创业团队核心成员", "项目合伙人制企业", "投资+运营型合伙人"], "unsuitableJobs": ["独立创业（不找合伙人）", "纯执行型基层岗位", "需要完全自主决策的岗位"], "pathCompare": {"good": "顺应天赋：在你想进入的赛道里，主动寻找技能和性格互补的潜在合伙人。先合作一个小项目测试默契，再考虑正式合伙。合同和股权一定要提前谈清楚——好的关系建立在清晰的规则之上。", "bad": "逆天赋：要么强迫自己独立创业（你会累死），要么一直在组织里做执行者（你会闷死）。你最大的价值在于「连接」和「协作」，别浪费这个天赋。"}, "plan90": ["第1-30天：梳理你的核心优势和明确短板，想清楚你需要什么样的合伙人补位。参加行业活动、创业社群，有意识地寻找潜在合伙人。列出你理想的合伙人画像。", "第31-60天：和2-3个潜在合伙人深度交流，可以先合作一个小型项目测试默契度和价值观匹配度。讨论核心问题：股权怎么分？决策机制是什么？退出机制怎么设计？", "第61-90天：确定合伙人，签订正式协议（一定要找律师审过）。明确分工和决策流程，启动第一个正式项目。建立定期复盘机制，合伙关系也需要持续维护。"], "closing": "伟大不是一个人走出来的。找到你的第二颗星，一起发光。", "posterText": "你不是一个人在战斗", "posterSubtext": "找到对的人，1+1大于10"}, "E": {"name": "🎨 自由职业型", "subtitle": "你要的不是一个公司，而是掌控自己时间的自由", "maturityScore": 81, "indices": [{"label": "自主性", "value": 93}, {"label": "技能深度", "value": 85}, {"label": "灵活性", "value": 90}], "diagnosis": "很多人把「自由职业」和「创业」混为一谈，但你知道它们的本质区别：创业是要建立一个可以脱离你运转的系统，而自由职业是用你的技能直接兑换收入——你本身就足够值钱。你不一定想做多大，但你一定不想被管着。你在某个领域有一技之长（或者正在快速积累），而且你享受「干完活就走」的干脆感。你不喜欢管人，也不喜欢被人管。自由职业对你是最优解：可以同时接多个项目、保持收入多元化、随时调整方向。你的目标是成为一个「超级个体」，而不是一个公司的老板。", "radarData": [{"label": "决策风格", "value": 75}, {"label": "风险承受", "value": 60}, {"label": "独立意愿", "value": 95}, {"label": "结果导向", "value": 65}, {"label": "团队协作", "value": 35}], "suitableJobs": ["独立设计师/插画师", "自由撰稿人/内容创作者", "独立开发者/技术顾问", "线上教育讲师/教练"], "unsuitableJobs": ["企业中层管理（需要大量管人）", "实体店铺创业", "需要大量团队协作的岗位"], "pathCompare": {"good": "顺应天赋：深耕一个垂直技能到行业前20%，建立个人品牌和稳定客户渠道。学会给自己定价——按价值收费而非按时间。建立多元收入结构，不依赖单一客户。", "bad": "逆天赋：硬着头皮去招人、管人、规模化，你会发现自己既不擅长也不享受，最后既没赚到钱还丢了自由。"}, "plan90": ["第1-30天：确定你的核心变现技能是什么。建立个人作品集和社交媒体形象，每天输出至少一条专业内容。在自由职业平台上注册并开始接单，哪怕价格低一点也要先攒案例。", "第31-60天：优化你的服务定价和交付流程，争取把客单价提高30%。开始积累老客户转介绍和口碑。建立标准化的接单、交付、收款流程，减少沟通成本。", "第61-90天：筛选优质客户，逐步淘汰低价值订单。探索被动收入的可能性（模板、课程、数字产品）。目标：月收入稳定在之前工资的80%以上。"], "closing": "你不属于任何公司，你属于你自己。把技能磨成刀，走到哪都有饭吃。", "posterText": "你的才华，不需要一个工位来证明", "posterSubtext": "超级个体的时代，一个人就是一家公司"}}, "loadingMessages": ["正在分析你的决策偏好...", "评估你的风险倾向中...", "扫描独立意愿强度...", "测算你的结果导向指数...", "生成职业画像中...", "分析完成。"], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "匹配度"}, "mixedNotes": {"A+B": "很有意思的矛盾体：你既有创业者的果决，又有上班族的理性。这说明你完全可以在组织内部创业（intrapreneurship），找一个能给你充分自主权的大平台，鱼和熊掌兼得。", "A+C": "你离创业只差一个「安全垫」。你的内核是创业型的，但你的谨慎让你不会冲动裸辞。建议你从现在开始启动副业，用过渡路线平滑切换。", "A+D": "你天生就该创业，但别一个人干。你的果断需要一个理性合伙人帮你兜底，找到那个互补的人，你们会是黄金搭档。", "A+E": "你是一个「独行侠型」的创业者——不需要管人，也不需要被人管。建议走「超级个体」路线，把你的专业能力产品化，一个人赚一个团队的利润。", "B+C": "你骨子里是适合组织的，但又在寻找更多可能性。别逼自己创业——你更适合在组织内找到新的增长曲线，争取内部轮岗或新业务负责人角色。", "B+D": "你是组织里的「天然粘合剂」。你最适合在好平台上做一个强执行力的核心骨干，配合一个能给你方向的领导，你会非常出色。", "B+E": "你不一定非要创业才能获得自由。寻找一家有远程办公文化或弹性工作的好公司，你能同时拥有稳定和自由。", "C+D": "你对风险有清醒认知，又渴望协作。最理想的路径是「兼职合伙人」——保持主业的稳定，同时以合伙身份参与一个创业项目，不ALL IN但深度参与。", "C+E": "你是典型的「斜杠青年」种子选手。用主业保障生活，用副业释放创造力，两条腿走路最稳也最远。", "D+E": "你既需要自由又擅长协作——这很妙。你最适合找一个「互补型搭档」，你出技能TA出资源，合作而非雇佣，双方都保持独立又互相成就。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

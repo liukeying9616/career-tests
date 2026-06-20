@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>你骨子里想要什么样的生活？</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "你骨子里想要什么样的生活？", "subtitle": "5种人生原型，揭示你内心深处真正向往的生活方式", "description": "你有没有感觉现在的生活不是自己真正想要的？每天忙忙碌碌，却说不清自己到底在追求什么？通过20道深度探索题，精准定位你骨子里最真实的5种人生原型——是隐居田园的宁静、都市精英的璀璨、探索冒险的自由、创造表达的激情，还是连接贡献的意义？找到答案，重新设计属于你的理想生活。", "keywords": "理想生活测试,人生原型,生活方式选择,人生方向,自我认知,内心渴望,小红书测试", "primaryColor": "#5b8c5a", "ogImage": ""}, "home": {"title": "你骨子里想要什么样的生活？", "subtitle": "5种人生原型，直击你内心深处最真实的渴望", "introHTML": "<p>你有没有这样的时刻：看着窗外的天空发呆，心里隐约觉得——<strong>现在的生活，好像不是我真正想要的</strong>。但问你到底想要什么，又说不出一个确切的答案。</p><p>我们每个人骨子里都有一个<strong>人生原型</strong>——它决定了什么能让你真正快乐、什么让你感到空虚、什么值得你为之奋斗一生。有人向往田园的宁静与简单，有人渴望都市的璀璨与竞争，有人无法在一处停留，有人需要用创作来表达灵魂，还有人在帮助他人的过程中找到生命的意义。</p><p>20道直击灵魂的测试题，帮你剥离外界的期待和社会的标准，找到你骨子里最真实的人生渴望。没有对错，只有最适合你的活法。</p>", "btnText": "开始测试", "disclaimer": "本测试仅供娱乐参考，人生的选择是复杂而多元的，请结合自身实际情况做出判断。"}, "dimensions": [{"name": "生活方式", "icon": "🏡", "questionIds": [1, 2, 3, 4, 5]}, {"name": "关系需求", "icon": "💞", "questionIds": [6, 7, 8, 9, 10]}, {"name": "成就定义", "icon": "🏆", "questionIds": [11, 12, 13, 14, 15]}, {"name": "自由度", "icon": "🕊️", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "如果没有任何限制，你理想中的一天是怎么度过的？", "options": [{"key": "A", "text": "在乡间小屋醒来，泡杯茶，看书、种花、散步，安静而充实"}, {"key": "B", "text": "在市中心高层公寓醒来，健身、高效工作、参加有质量的社交"}, {"key": "C", "text": "在一个全新的城市醒来，探索街头巷尾，不知道今天会遇见什么"}, {"key": "D", "text": "在堆满材料和工具的工作室醒来，沉浸在创作中，忘了时间的流逝"}, {"key": "E", "text": "在社区中心醒来，帮助身边的人解决问题，看到大家因为你的存在而露出笑容"}]}, {"id": 2, "text": "五年之后，你最想住在什么样的地方？", "options": [{"key": "A", "text": "远离城市喧嚣的小镇或乡村，有山有水有院子，安静从容"}, {"key": "B", "text": "一线城市核心地段，楼下就是精品咖啡和高端商场，生活高效而精致"}, {"key": "C", "text": "不确定住在哪里！可能在几个国家和城市之间流动，四海为家"}, {"key": "D", "text": "一个充满艺术气息的街区，周边有画廊、独立书店和各种有意思的工作室"}, {"key": "E", "text": "一个有温度的社区，邻里之间互相认识、互相帮助、有归属感的地方"}]}, {"id": 3, "text": "一个完全属于自己的周末早晨，你最享受做什么？", "options": [{"key": "A", "text": "在阳光里发发呆，做一顿简单的早餐，不赶时间、不看手机地慢慢过"}, {"key": "B", "text": "去当下最火的brunch店打卡，顺便跟朋友聊聊最近的新机会和新想法"}, {"key": "C", "text": "背上背包去一个从没去过的地方，哪怕只是城市另一端的一个早市"}, {"key": "D", "text": "泡在工作室里，把脑子里那个酝酿了一周的灵感和想法变成现实"}, {"key": "E", "text": "参加一场志愿者活动，或者帮朋友一起策划一个对未来有意义的小项目"}]}, {"id": 4, "text": "以下哪种环境让你感觉最自在、最能做真实的自己？", "options": [{"key": "A", "text": "安静的大自然中，只有风声、鸟鸣和自己的呼吸声"}, {"key": "B", "text": "繁华的城市中心，高楼林立、霓虹交错，感到活力和无限可能"}, {"key": "C", "text": "旅途中的任何一个未知之地，未知本身对我来说就是最好的风景"}, {"key": "D", "text": "一个堆满材料和工具的创作空间，看起来杂乱但充满了无限可能性"}, {"key": "E", "text": "一群人围坐在一起讨论怎么让世界变得更好，能量和热情互相感染"}]}, {"id": 5, "text": "关于物质和消费，你的态度最接近下面哪一种？", "options": [{"key": "A", "text": "够用就好，少即是多。不被物质绑架的自由才是真正的高级"}, {"key": "B", "text": "品质至上，好的东西值得投资。物质是品位和努力的外在体现"}, {"key": "C", "text": "把钱花在体验上——旅行、美食、学习。东西够用就行，故事越多越好"}, {"key": "D", "text": "愿意为审美和创意买单。好看、独特、有设计感的物品让我发自内心地快乐"}, {"key": "E", "text": "钱是工具不是目的。有更多的钱意味着可以帮助更多的人、做更多有意义的事"}]}, {"id": 6, "text": "你心中最理想的亲密关系，最接近下面哪一种描述？", "options": [{"key": "A", "text": "两个人安静地在一起，不需要太多言语，彼此陪伴本身就是最好的爱情"}, {"key": "B", "text": "势均力敌的搭档，互相成就、并肩作战、一起站在更高的地方看世界"}, {"key": "C", "text": "一个愿意陪我一起看世界的人，自由而深刻，不拘泥于传统的形式"}, {"key": "D", "text": "能真正理解我内心世界的人，欣赏并支持我的创作，给我灵感和独立的空间"}, {"key": "E", "text": "有共同价值观的灵魂战友，一起做有意义的事，关系在共同使命中不断升华"}]}, {"id": 7, "text": "关于友情，你内心最真实的需求是什么？", "options": [{"key": "A", "text": "三两个真正的知己，不需要频繁联系和热闹的聚会，但彼此心中始终都有对方"}, {"key": "B", "text": "一群优质的朋友，可以交流思想、互换资源、互相激励，共同向上"}, {"key": "C", "text": "世界各地都有几个朋友，每次久别重逢都有说不完的故事和新鲜感"}, {"key": "D", "text": "懂我创作和表达的同类，跟他们在一起可以自由地分享灵感、碰撞火花"}, {"key": "E", "text": "一群志同道合的人，为了某个共同的理想和目标一起努力，友谊在行动中加深"}]}, {"id": 8, "text": "你对「家」的想象和期待，更接近哪一种？", "options": [{"key": "A", "text": "一个小而温暖的家，简简单单，一日三餐、四季平安，足矣"}, {"key": "B", "text": "高品质的家庭生活，好的教育、好的环境，给孩子最好的起点和平台"}, {"key": "C", "text": "不一定是传统固定的家庭形态——可能是旅居家庭，或者在多个地方都有自己的家"}, {"key": "D", "text": "一个充满创意和自由氛围的家，不按常规出牌，每个人都可以做自己"}, {"key": "E", "text": "核心家庭之外还有一个更大的「家庭」——社区、志同道合的人，彼此关照"}]}, {"id": 9, "text": "在一个群体中，你最希望自己自然而然地扮演什么角色？", "options": [{"key": "A", "text": "安静而可靠的存在，不争不抢不出风头，但大家知道有你在就很安心"}, {"key": "B", "text": "核心人物之一，有话语权、有影响力，能够推动重要的事情发生"}, {"key": "C", "text": "带来新鲜视角和故事的人，分享一路上的见闻和意想不到的想法"}, {"key": "D", "text": "灵感提供者或氛围创造者，让群体因为你的存在而变得更有趣、更特别"}, {"key": "E", "text": "凝聚者和支持者，让大家在一起更有温度、更有方向、更有归属感"}]}, {"id": 10, "text": "你如何看待人际关系中的「独处时间」？", "options": [{"key": "A", "text": "独处是必需品，没有足够的独处时间我会慢慢枯萎，再亲密的关系也需要留白"}, {"key": "B", "text": "适度的独处可以，但高质量的关系和有效社交也是我生活中不可或缺的能量来源"}, {"key": "C", "text": "独处和社交交替进行是理想状态，我需要自由的节奏，不能被任何一端长期束缚"}, {"key": "D", "text": "独处时往往是我最有创造力的时候，但创作完成后的分享和共鸣也同样重要"}, {"key": "E", "text": "独处是为了更好地充电然后去服务他人，一个人的沉淀是为了跟更多人更好地连接"}]}, {"id": 11, "text": "对你个人而言，「成功」最准确和最诚实的定义是什么？", "options": [{"key": "A", "text": "内心的平静和满足，不被外界的评价和标准所左右，过自己真正想过的生活"}, {"key": "B", "text": "在事业上取得公认的成就，有行业地位、有财富自由、有社会影响力"}, {"key": "C", "text": "经历过足够丰富的人生，去过了想去的地方，心里没有「早知道就…」的遗憾"}, {"key": "D", "text": "创造出能经得起时间考验的作品，用创作来表达我对这个世界的独特理解"}, {"key": "E", "text": "让这个世界因为我的存在而变得好了那么一点点，无论这个改变是大是小"}]}, {"id": 12, "text": "十年后的某一天回头望，做了什么事会让你觉得「这辈子值了」？", "options": [{"key": "A", "text": "我按照自己的意愿过完了这十年，没有活在别人的期待和社会的标准里"}, {"key": "B", "text": "我建立或参与了一番了不起的事业，站在了行业的顶端，成为了一个标杆"}, {"key": "C", "text": "我去过了所有曾经想去的地方，体验了各种不一样的人生可能性"}, {"key": "D", "text": "我留下了能被一些人记住的作品，哪怕数量不多，但每一件都足够真诚"}, {"key": "E", "text": "我实实在在地帮助和影响了很多人的生命，他们的故事中因为我而有了不同"}]}, {"id": 13, "text": "面对一个非常有挑战性的大目标时，你的心态更接近哪种？", "options": [{"key": "A", "text": "我会认真想清楚这到底是不是我真正想要的，如果不是，不勉强自己也是一种智慧"}, {"key": "B", "text": "挑战越大我越兴奋，这是我证明自己、突破天花板的最佳时机"}, {"key": "C", "text": "只要是之前没试过的，我都愿意去挑战——过程本身比结果更重要"}, {"key": "D", "text": "如果这个挑战能激发我全新的创作灵感，我愿意投入全部的热情和精力"}, {"key": "E", "text": "如果这个挑战成功后能创造更大的社会价值、帮到更多人，再难也值得全力以赴"}]}, {"id": 14, "text": "你对「竞争」这件事的真实看法是什么？", "options": [{"key": "A", "text": "不太喜欢竞争这件事，每个人都有自己的节奏和花期，盲目比较没有意义"}, {"key": "B", "text": "竞争是最好的成长加速器，在跟强者的较量中才能看到自己真正的上限"}, {"key": "C", "text": "竞争只是人生的游戏之一，赢了当然开心，但输了也不会影响我看世界的心情"}, {"key": "D", "text": "我不太喜欢跟别人竞争，但我享受不断超越和迭代昨天的自己"}, {"key": "E", "text": "比起竞争，我更相信合作的力量——大家一起把蛋糕做大，比互相抢蛋糕更有价值"}]}, {"id": 15, "text": "如果有人当面对你说「你这样好像不太上进啊」，你的内心反应是？", "options": [{"key": "A", "text": "默默在心里想「你又不知道我真正想要的是什么」，然后继续过我自己的日子"}, {"key": "B", "text": "会认真反思，如果对方说得有道理，我会加倍努力用成绩来证明自己"}, {"key": "C", "text": "笑一笑不说话。每个人定义的上进本来就不一样，我的人生不需要别人来打分"}, {"key": "D", "text": "不太在意。对我来说，创作本身就已经是一种最大的「上进」，只是别人看不懂"}, {"key": "E", "text": "如果我的「不上进」换来了更多人的幸福和改变，那我觉得这也是一种很棒的选择"}]}, {"id": 16, "text": "关于工作和生活之间的边界，你内心最理想的状态是？", "options": [{"key": "A", "text": "清晰的边界，工作就是工作、生活就是生活，互不侵犯、各自安好"}, {"key": "B", "text": "工作就是生活中很重要的组成部分，我享受被有意义的工作填满的充实和成就感"}, {"key": "C", "text": "没有固定的边界——今天可能在巴厘岛写方案，明天在清迈开线上会议，后天在东京学料理"}, {"key": "D", "text": "工作就是创作、创作就是生活，不需要刻意区分，融合在一起就是最好的状态"}, {"key": "E", "text": "工作是为了更好地服务于我的生活目标和使命，在更大的意义面前，边界不是那么重要"}]}, {"id": 17, "text": "如果突然获得一笔足够你十年不工作的钱，你最想做什么？", "options": [{"key": "A", "text": "立刻搬到一个喜欢的地方，过简简单单的日子，做自己喜欢的、小小的、美好的事"}, {"key": "B", "text": "把它作为更大事业的启动资金，十年之后我要站在一个比现在高得多的地方"}, {"key": "C", "text": "立刻买张机票出发，开启环球旅行，把钱投资在体验和故事上"}, {"key": "D", "text": "搭建一个属于自己的工作室，不用考虑任何商业回报，纯粹地创作整整十年"}, {"key": "E", "text": "成立一个基金或发起一个项目，用这笔钱系统性地去解决一个我关心的社会问题"}]}, {"id": 18, "text": "你对「计划」和「人生规划」的真实态度是？", "options": [{"key": "A", "text": "不太喜欢做长远的大计划，活在当下、顺着生活的流动自然前行比较舒服"}, {"key": "B", "text": "必须有清晰的五年规划和每年的目标，没有路线图和里程碑你怎么到达目的地？"}, {"key": "C", "text": "计划赶不上变化，有个大方向就可以了，中途随时可以调整和改道"}, {"key": "D", "text": "创作不太需要严密的计划，灵感来了就全力以赴地做，灵感走了就等下一波"}, {"key": "E", "text": "有计划但保持足够的弹性，只要大的使命和方向是对的，具体路径可以灵活调整"}]}, {"id": 19, "text": "以下哪一种自由，在你目前的人生阶段中感觉最稀缺、最珍贵？", "options": [{"key": "A", "text": "时间的自由——不用朝九晚五，可以完全按照自己的节奏来安排每一天"}, {"key": "B", "text": "选择的自由——有能力对不想要的东西果断说不，对想要的东西有底气去争取"}, {"key": "C", "text": "行动的自由——想去哪里就去哪里，不被任何一个地方或身份长期束缚"}, {"key": "D", "text": "表达的自由——能够不受限制地创作和表达自己，不被商业或他人的眼光所绑架"}, {"key": "E", "text": "使命的自由——能够自由地选择想要为谁、为什么事业奉献自己的时间和才华"}]}, {"id": 20, "text": "闭上眼睛，你脑海中浮现出的最美好、最让你心动的画面是什么？", "options": [{"key": "A", "text": "夕阳下，一个人或和爱的人安静地坐在院子里，看着天色慢慢变化，内心一片宁静"}, {"key": "B", "text": "站在高楼顶层的落地窗前，俯瞰整座璀璨的城市，感觉一切都在掌控之中"}, {"key": "C", "text": "背着行囊站在一个从未到过的山顶或异国街头，深吸一口气，感受扑面而来的无限可能"}, {"key": "D", "text": "完成一件作品的那一刻，静静地看着它，心里涌起巨大的、无法被任何东西替代的满足感"}, {"key": "E", "text": "看到那些被我帮助和影响过的人脸上绽放出由衷的笑容，那一刻觉得一切都无比值得"}]}], "resultTypes": {"A": {"name": "田园隐居型", "subtitle": "少即是多，慢即是快。你想要的不是退隐，而是回归", "maturityScore": 85, "indices": [{"label": "内心平静度", "value": 92}, {"label": "简约生活倾向", "value": 90}, {"label": "独立自足力", "value": 85}], "diagnosis": "你骨子里渴望的是「田园隐居型」生活——远离喧嚣，回归简单与本真。你不需要很大的房子，但需要一扇能看到绿色的窗；你不需要很多的钱，但需要不被物质绑架的自由。你内心深处对自然、宁静和慢节奏有着强烈的向往，城市里无休止的嘈杂和竞争让你感到疲惫和消耗。你想要的不是躺平或逃避，而是按照自己的时钟来生活：春天种花、夏天乘凉、秋天收获、冬天烤火。你享受小而确定的美好——一本好书、一杯热茶、一顿自己做的饭。这是一种非常深刻的生活选择：你不是不奋斗，只是你对「奋斗」的定义和别人不一样。在消费主义盛行、人人都在内卷的时代里，你想要的是做减法——减去不必要的欲望和负担，保留最本真、最能滋养灵魂的快乐与宁静。", "radarData": [{"label": "生活方式（内敛）", "value": 95}, {"label": "关系需求（独立）", "value": 80}, {"label": "成就定义（内在）", "value": 90}, {"label": "自由度（稳定）", "value": 85}, {"label": "生活幸福感", "value": 90}], "suitableJobs": ["独立创作者与自由职业者", "自然教育或生态农业从业者", "小而美的生活方式品牌主理人", "远程工作的深度思考型岗位"], "unsuitableJobs": ["高压快节奏的金融/互联网大厂", "需要高频社交和应酬的岗位", "以消费主义为导向的行业"], "pathCompare": {"good": "顺应天赋：选择一个让你能够控制节奏、亲近自然、独立工作的生活方式。你的能量来自于安静和独处，在低刺激、高自主的环境中，你的幸福感和创造力会达到巅峰。不需要跟别人比速度，你的赛道是深度和质感。", "bad": "逆天赋：长期待在高压、高刺激、快节奏的环境中，会让你持续消耗、逐渐枯萎。强迫自己去追求世俗定义的「成功」和「上进」，只会让你离真正的幸福越来越远。那不是你不行，是赛道选错了。"}, "plan90": ["断舍离实验：用第一个月，每周清理生活的一个领域（衣物、数字信息、无效社交、重复消费），目标是减少50%你其实并不需要的东西。轻装上阵，才能走得更远。", "微田园实践：在你现有的居住空间中创造一个自然角落——阳台种一盆香草、窗台养一株绿植、桌上放一瓶鲜花。每天花5分钟照料它们，体验生命安静生长的美好节奏。", "低欲望生活方式设计：重新规划你的消费结构，把预算从「买东西」逐渐转移到「买时间」和「买体验」。尝试一个月只买必需品，记录下这个过程中的感受和发现。"], "closing": "真正的富足，不是你拥有了多少，而是你不需要多少也能感到幸福和圆满。", "posterText": "田园隐居型——少即是多，慢即是快", "posterSubtext": "我不是在逃避世界，我是在选择一种更诚实的生活方式"}, "B": {"name": "都市精英型", "subtitle": "志在巅峰，不负韶华。你属于城市的天际线", "maturityScore": 83, "indices": [{"label": "成就驱动力", "value": 93}, {"label": "品质追求度", "value": 90}, {"label": "竞争意识", "value": 88}], "diagnosis": "你骨子里渴望的是「都市精英型」生活——在城市的中心，站在高处俯瞰世界。你享受竞争带来的刺激和成长，享受不断突破自我上限的那种快感。你想要的不是平庸的安稳，而是一个值得你全力以赴的战场。高楼林立、霓虹交错，对你来说那不是压力和拥挤，而是澎湃的活力和无限的可能性。你对生活品质有很高的要求，对事业成就有强烈的渴望，对社会地位有明确的追求——这些不需要遮掩，这正是驱动你不断向前的燃料。你希望在最好的城市里、做最有价值的事情、跟最优秀的人共事。唯一需要注意的是，在这条高速前进的路上，别忘了偶尔停下来看看窗外的风景，问问自己：这真的是我想要的，还是只是别人眼中的「好」。精英之路可以走得很快，但只有带着自我觉察前行，才能走得又快又稳。", "radarData": [{"label": "生活方式（外放）", "value": 95}, {"label": "关系需求（依赖）", "value": 75}, {"label": "成就定义（外在）", "value": 95}, {"label": "自由度（稳定）", "value": 65}, {"label": "生活幸福感", "value": 80}], "suitableJobs": ["企业管理与高管岗位", "投资银行与金融精英", "创业公司创始人/CEO", "高端咨询与战略顾问"], "unsuitableJobs": ["节奏过慢的传统行业", "缺乏成长空间的螺丝钉岗位", "不认可竞争和绩效导向的组织文化"], "pathCompare": {"good": "顺应天赋：把你的雄心和执行力投入到一个足够大的舞台——选择快速增长的行业、优秀的团队、有挑战性的目标。你的动力来自外部的认可和内部的成就感，在竞争中你会越战越勇。拥抱你的野心，它不是你该隐藏的东西，而是你的引擎。", "bad": "逆天赋：长期待在一个天花板很低、缺乏竞争和成长空间的环境中，你会感到窒息和焦虑。或者，一味追逐外部的成功指标而忽略内心真正的需求，也可能在到达山顶后发现风景并不如想象中那么美。"}, "plan90": ["目标校准：重新审视你未来一年的职业和生活目标，问自己一个诚实的问题——这些目标是我真正想要的，还是社会或家庭投射给我的期待？保留真正属于你的，放下不属于你的。", "能量审计：记录一周的完整时间分配，标注每件事是「高价值高满足」、「高价值低满足」还是「低价值低满足」。砍掉最后一类，优化第二类，让第一类占据你60%以上的时间。", "视野跃升：报名一个行业顶级峰会或跨领域的高质量课程，主动跟三个你认为比自己优秀很多的人做一次有深度的交流。精英的成长，往往来自于跟更强者同行的压力和启发。"], "closing": "站得高不是为了俯视别人，而是为了看到更远的风景和更大的可能性。", "posterText": "都市精英型——志在巅峰，不负韶华", "posterSubtext": "我享受城市的节奏和竞争，因为我知道，自己注定属于更大的舞台"}, "C": {"name": "探索冒险型", "subtitle": "世界为家，体验即意义。你的人生是一本正在写的冒险小说", "maturityScore": 82, "indices": [{"label": "好奇心强度", "value": 95}, {"label": "体验开放性", "value": 92}, {"label": "不确定性耐受力", "value": 88}], "diagnosis": "你骨子里渴望的是「探索冒险型」生活——世界对你来说是一本无尽的书，而你绝不愿意只读第一页就停下来。你无法忍受一眼就能望到头的人生，无法接受在同一个地方、做同一件事情、重复同一天的日子。你的内心深处有一股强烈的好奇心和不安分的因子，它驱使你不断地向外探索——新的城市、新的文化、新的技能、新的朋友、新的自己。你的人生信条是「体验即意义」：你不那么在乎银行账户里有多少钱，但你在乎护照上多了几个印章、脑海里多了几个故事、生命中多了几种可能性。你可能是数字游民、背包客、不断跨界的斜杠青年，或者只是内心深处一直在计划下一次出发的「暂时停靠者」。需要提醒你的是，真正的探索不只是在地理上不停地移动——学会在某个地方、某段关系、某个领域中扎根和深耕，本身也是一种非常值得探索的深刻体验。自由不只是「离开」的能力，也是「留下」的勇气。", "radarData": [{"label": "生活方式（外放）", "value": 90}, {"label": "关系需求（独立）", "value": 85}, {"label": "成就定义（内在）", "value": 80}, {"label": "自由度（流动）", "value": 95}, {"label": "生活幸福感", "value": 85}], "suitableJobs": ["旅行内容创作者与博主", "数字游民/远程自由职业", "跨文化顾问与国际商务", "探险旅游与体验设计"], "unsuitableJobs": ["高度固定和重复的岗位", "长期被绑定在一个地点的工作", "缺乏变化和新意的螺丝钉式职位"], "pathCompare": {"good": "顺应天赋：设计一种允许你不断探索和变化的生活方式——远程工作、项目制合作、季节性工作、或者本身就是以探索为核心的职业。你的能量来自于新鲜感和自由度，当你能够掌控自己的时间和地点时，你的效率和生活满意度都会飙升。", "bad": "逆天赋：长期被锁在一个固定的岗位、固定的城市、固定的生活模式中，你会感到像被关在笼子里一样焦躁和窒息。或者，永远在探索但从未在任何地方深耕，也可能导致浅尝辄止、缺乏积累的遗憾。"}, "plan90": ["探索清单具象化：写下你一直想去但还没行动的三个地方、三项想学但还没开始的技能。从中选一个最容易实现的，从这个月起就迈出第一步——订机票、报课程、做攻略。", "迷你冒险计划：在接下来的四周，每周做一件你从未做过的小事——走一条没走过的路回家、吃一家没吃过的异国料理、跟一个平时不会交谈的陌生人聊五分鐘。让探索成为一种肌肉记忆。", "自由职业可行性探索：调研至少三种可以让你远程或自由行动的工作模式（自由撰稿、线上教学、电商、远程编程等），选择一个最可行的方向，尝试完成第一个小项目或建立第一个客户关系。"], "closing": "人生最遗憾的，不是你去了哪里又离开了，而是你从未出发，却骗自己说「现在这样也挺好」。", "posterText": "探索冒险型——世界为家，体验即意义", "posterSubtext": "我的财富不是银行里的数字，而是护照上的印章和心里的故事"}, "D": {"name": "创造表达型", "subtitle": "用创作，为这个世界打上属于你的独特印记", "maturityScore": 84, "indices": [{"label": "创造力指数", "value": 93}, {"label": "表达欲望度", "value": 90}, {"label": "审美敏感度", "value": 88}], "diagnosis": "你骨子里渴望的是「创造表达型」生活——把内心丰富而独特的世界通过某种形式呈现出来，这是你生命中最重要、最不可替代的事情。无论是写作、绘画、音乐、设计、手工、视频还是任何其他形式的创作，你都需要一个持续的表达出口。你不是为了获得认可而创作——虽然认可和共鸣确实会让你感到幸福——而是因为创作本身就是你呼吸的方式。不创作的时候你会感到莫名的焦躁、空虚和迷失，而完成一件作品后的那种巨大满足感，几乎无法被任何物质或外部奖励所替代。你想要的不是一份传统的「工作」，而是一种以创作为核心的、完整的生活方式。需要提醒你的是，创作之路需要理想和现实之间的平衡——找到一种可持续的创作和收入模式，比单纯的才华和一时的热情更能支撑你走得更远。面包和灵感，两者都值得被认真对待和精心规划。", "radarData": [{"label": "生活方式（内敛）", "value": 75}, {"label": "关系需求（独立）", "value": 80}, {"label": "成就定义（内在）", "value": 95}, {"label": "自由度（流动）", "value": 85}, {"label": "生活幸福感", "value": 85}], "suitableJobs": ["独立艺术家与创作者", "设计师与创意总监", "作家、编剧与内容创作者", "手工艺人与独立品牌主理人"], "unsuitableJobs": ["高度标准化、不容创意的岗位", "纯粹以效率和KPI驱动的流水线工作", "压抑个性和表达的保守组织文化"], "pathCompare": {"good": "顺应天赋：把你的创造力投入到你真正热爱的领域，建立一个以创作为核心的生活和工作模式。你可以是独立创作者，也可以在组织中找到需要创意和审美的角色。关键是每天都有创作的空间和时间，这是你的刚需，不是奢侈品。", "bad": "逆天赋：长期做一份不需要任何创意表达、只是机械执行的工作，会让你感到灵魂在慢慢干涸。或者，完全忽视商业化的一面，也可能让你的创作之路因缺乏可持续的收入支持而无以为继。"}, "plan90": ["创作打卡挑战：开启一个30天创作挑战——每天完成一个小创作，写300字、拍一张照片、画一幅速写、录一段短视频。规则是：不追求完美，只追求完成。让创作从「等灵感」变成「练肌肉」。", "作品公开练习：从你的作品中选出三个你最满意的，鼓起勇气在社交平台上公开发布。创作需要观众，就像种子需要阳光。你可能会惊喜地发现，世界上有很多人正在等待你这样的声音。", "创作者商业模式设计：深入研究三个你欣赏的创作者是怎么养活自己的（接单、教学、平台分成、周边产品、赞助等），结合自己的情况，设计一个属于你的、可持续的创作收入模式雏形。"], "closing": "世界上不缺一个完美的人，但缺一个用你独特的方式表达世界的你。开始吧，哪怕只是很小的一步。", "posterText": "创造表达型——用创作，为世界打上我的印记", "posterSubtext": "创作不是我的工作，是我的呼吸方式。不创作的时候，我在收集创作的素材"}, "E": {"name": "连接贡献型", "subtitle": "点燃自己，照亮他人。你的人生价值在于让世界变得更好", "maturityScore": 88, "indices": [{"label": "共情与利他心", "value": 95}, {"label": "社区意识", "value": 90}, {"label": "意义驱动强度", "value": 92}], "diagnosis": "你骨子里渴望的是「连接贡献型」生活——你很早就意识到，个人成就带来的快乐是有上限的，而真正持久、深沉的满足感，来自于对他人的贡献和与世界的深度连接。你总是不自觉地关注身边人的需求，乐于伸出援手，在帮助他人、凝聚社群、创造改变中找到自己存在的核心意义。你想要的不是独善其身的成功和孤独的辉煌，而是一群人一起变好的温暖过程。无论是投身公益、从事教育、营造社区，还是在日常工作中默默托举和支持他人，你最深层的驱动力来自于一种确信：「这个世界，因为有我的存在，而有了一点点不同。」这是马斯洛需求金字塔顶端的人生追求，充满意义但也充满挑战。需要特别提醒你的是：过度奉献而忽视自身需求，是很多贡献型人格的隐秘陷阱。照顾好自己不是自私，而是对他人负责的重要前提——一个空杯子，是倒不出水来给别人的。", "radarData": [{"label": "生活方式（外放）", "value": 80}, {"label": "关系需求（依赖）", "value": 90}, {"label": "成就定义（外在）", "value": 85}, {"label": "自由度（稳定）", "value": 70}, {"label": "生活幸福感", "value": 90}], "suitableJobs": ["公益组织与社会企业", "社区营造与社群运营", "教育与培训工作者", "社会影响力投资与咨询"], "unsuitableJobs": ["纯粹以利润最大化为唯一目标的行业", "需要违背自身价值观的岗位", "孤立于社会、缺乏人际连接的工作"], "pathCompare": {"good": "顺应天赋：把你的共情力和利他心投入到一个值得的使命中——选择能创造真实社会价值的工作或事业。你的能量来自于看到自己的行动对他人产生了积极的影响，当你做的事情和你的价值观完全对齐时，你会拥有源源不断的动力。", "bad": "逆天赋：长期在一份跟你的价值观相悖、或者看不到任何社会意义的工作中，会让你感到深刻的虚无和耗竭。或者，一味付出而从不给自己充电，可能导致「贡献型倦怠」——身心俱疲，连最初的热爱都被消耗殆尽。"}, "plan90": ["服务行动落地：找到一个你可以持续参与的、跟你价值观一致的志愿活动或社区项目，每周投入至少2小时。不要停留在想法的层面，用实际行动迈出第一步。", "连接地图绘制：画出你生活中最重要的关系网络图，标注每个人的需求和你力所能及的支持方式。有时候最大的贡献不是轰轰烈烈的项目，而是一句真诚的问候、一次认真的倾听。", "自我关怀制度化：制定一个具体的、可执行的自我照顾方案——保障充足的睡眠、定期的身体锻炼、能让你放松的娱乐活动。在你的日历上把这些时间固定下来，像对待对他人的承诺一样认真对待对自己健康的承诺。"], "closing": "衡量生命价值的，不是你得到了多少，而是你给予了多少、多少人因为你的存在而变得更好。", "posterText": "连接贡献型——点燃自己，照亮他人", "posterSubtext": "我不需要成为最亮的那颗星，我只需要让周围的世界，因为有我而更温暖一点"}}, "loadingMessages": ["正在探索你内心深处的渴望……", "正在解码你的理想生活方式……", "正在分析你的关系需求模式……", "正在重新定义你对成功的理解……", "正在测算你对自由的真实需求……", "正在绘制你独一无二的人生原型画像……", "分析完成，准备揭晓你骨子里的答案！"], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "匹配度"}, "mixedNotes": {"A+B": "田园隐居与都市精英的奇妙拉扯——你既向往宁静简单的生活，又放不下对成就和品质的追求。这可能是你人生阶段性的内在矛盾，也可能说明你想要的是一种「进可攻退可守」的弹性生活。不妨尝试「阶段性隐居+阶段性冲刺」的节奏，找到两者的动态平衡。", "A+D": "隐居与创作的自然联盟——你想要的是一种在安静环境中自由创作的生活方式。陶渊明式的田园加上艺术家的表达欲，这其实是一条非常经典且自洽的道路。很多伟大的作品，都是在远离喧嚣的宁静中诞生。寻找一个能同时满足两者的小天地。", "B+C": "精英与冒险的双重驱动——你既想在事业上站到高处，又无法放弃探索世界的渴望。你不必在两者之间二选一：成为一个「全球化的精英」——在多个城市有事业、在不同文化中建立影响力，这本身就是一种令人兴奋的活法。", "C+E": "探索者与贡献者的融合——你既要看世界，又想改变世界。这是最强大的一种组合：先去探索和体验，然后把你在旅途中学到的东西带回来，用于帮助和启发更多的人。你可以是一个「带着使命出发的探索者」。", "D+E": "创作者与贡献者的共鸣——你想通过创作来表达自己，同时又渴望你的创作能对他人产生积极的影响。这是创作的最高境界——不是为了自我满足而创作，而是为了让看到你作品的人感到被理解、被启发、被治愈。继续创作那些能温暖世界的内容。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>你该换工作，还是换活法？</title>
+<meta name="description" content=""/>
+<style>
+:root{
+  --c-bg:#fefaf6;--c-card:#fff;--c-text:#2c2420;--c-muted:#8c7a6b;
+  --c-primary:#d4784a;--c-primary-light:#fdf0e8;--c-border:#e8ddd2;
+  --c-accent-a:#e8784a;--c-accent-b:#4a9eb0;--c-accent-c:#8b6caf;
+  --c-accent-d:#5a8a6a;--c-accent-e:#c08050;--c-danger:#c44;
+  --radius:12px;--shadow:0 2px 16px rgba(60,30,10,.06);
+  --font:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden}
+.page{display:none;padding:24px 20px 40px;min-height:100vh}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 首页 */
+.home-header{text-align:center;padding-top:40px}
+.home-header h1{font-size:1.75rem;font-weight:800;color:var(--c-primary);line-height:1.3;margin-bottom:8px}
+.home-header .sub{font-size:.9rem;color:var(--c-muted);margin-bottom:32px;line-height:1.5}
+.home-intro{background:var(--c-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:.875rem;color:var(--c-muted);line-height:1.8}
+.home-intro p{margin-bottom:8px}
+.home-intro .highlight{color:var(--c-primary);font-weight:600}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.dim-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);
+  padding:14px 12px;text-align:center;font-size:.8rem;font-weight:600;color:var(--c-text)}
+.dim-card .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);
+  font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-outline{background:var(--c-card);color:var(--c-primary);border:1.5px solid var(--c-border)}
+.footer-note{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:16px}
+.footer-code{text-align:center;font-size:.7rem;color:var(--c-muted);margin-top:8px;
+  font-family:'SF Mono',Consolas,monospace}
+
+/* 测试页 */
+.quiz-header{padding:8px 0 16px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-module{font-size:.75rem;color:var(--c-primary);font-weight:600;background:var(--c-primary-light);
+  padding:4px 10px;border-radius:20px}
+.quiz-progress{font-size:.75rem;color:var(--c-muted)}
+.progress-bar{height:3px;background:var(--c-border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--c-primary);transition:width .3s ease;border-radius:2px}
+.quiz-card{background:var(--c-card);border-radius:var(--radius);padding:24px 20px;
+  box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-card h3{font-size:1rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.opt-btn{display:block;width:100%;padding:14px 16px;margin-bottom:8px;background:var(--c-bg);
+  border:1.5px solid var(--c-border);border-radius:var(--radius);text-align:left;
+  font-size:.9rem;cursor:pointer;transition:all .12s;color:var(--c-text)}
+.opt-btn:active,.opt-btn.selected{background:var(--c-primary-light);border-color:var(--c-primary);
+  color:var(--c-primary);font-weight:600}
+.opt-key{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--c-border);border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px}
+.quiz-hint{text-align:center;font-size:.7rem;color:var(--c-muted);padding:8px}
+
+/* 加载页 */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.95rem;color:var(--c-text);min-height:28px;line-height:1.6}
+.loading-done{color:var(--c-primary);font-weight:600}
+
+/* 结果页 */
+.result-header{text-align:center;padding-top:20px}
+.result-type{font-size:2rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.result-subtitle{font-size:.9rem;color:var(--c-muted);margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;
+  width:80px;height:80px;border-radius:50%;border:4px solid var(--c-primary);
+  font-size:1.5rem;font-weight:800;color:var(--c-primary);margin-bottom:8px}
+.score-label{font-size:.75rem;color:var(--c-muted);margin-bottom:24px}
+
+.section{background:var(--c-card);border-radius:var(--radius);padding:20px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.section h3{font-size:.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--c-border)}
+.indices-row{display:flex;gap:10px;flex-wrap:wrap}
+.index-item{flex:1;min-width:80px;text-align:center;padding:10px 6px;
+  background:var(--c-bg);border-radius:8px}
+.index-val{font-size:1.3rem;font-weight:800;color:var(--c-primary)}
+.index-label{font-size:.7rem;color:var(--c-muted);margin-top:2px}
+
+.diagnosis-text{font-size:.85rem;line-height:1.8;color:var(--c-text);white-space:pre-line}
+
+.radar-wrap{display:flex;justify-content:center;padding:8px 0}
+.radar-wrap svg{max-width:280px;width:100%}
+
+.job-list,.no-list{list-style:none;padding:0}
+.job-list li,.no-list li{padding:8px 12px;margin-bottom:4px;background:var(--c-bg);
+  border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.job-list li::before{content:'✅';font-size:.75rem}
+.no-list li::before{content:'⚠️';font-size:.75rem}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:14px;border-radius:8px;font-size:.8rem;line-height:1.6}
+.compare-good{background:#f0f7f0;border:1px solid #c8e0c8}
+.compare-bad{background:#fef5f0;border:1px solid #f0d8c8}
+.compare-card h4{font-size:.8rem;margin-bottom:6px}
+
+.plan-steps{list-style:none;padding:0}
+.plan-steps li{padding:10px 12px;margin-bottom:6px;background:var(--c-bg);
+  border-radius:6px;font-size:.8rem;line-height:1.5;border-left:3px solid var(--c-primary)}
+
+.closing-text{font-size:.85rem;color:var(--c-muted);font-style:italic;text-align:center;line-height:1.7}
+
+.result-actions{display:flex;gap:10px;margin-top:20px}
+.result-actions .btn{flex:1;font-size:.85rem;padding:12px}
+
+/* 海报弹窗 */
+.poster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
+  justify-content:center;align-items:center;padding:20px}
+.poster-overlay.show{display:flex}
+.poster-card{background:#fff;border-radius:16px;padding:32px 24px;max-width:320px;width:100%;
+  text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.poster-card .ptype{font-size:1.8rem;font-weight:800;color:var(--c-primary);margin-bottom:4px}
+.poster-card .psub{font-size:.85rem;color:var(--c-muted);margin-bottom:16px}
+.poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
+  border-top:1px solid var(--c-border)}
+.poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 测试配置 — 由生成器注入
+// ═══════════════════════════════════════
+const CONFIG = {"meta": {"title": "你该换工作，还是换活法？", "subtitle": "5种职业决策方向，帮你看清下一步到底该怎么走", "description": "每天晚上想到第二天要上班就焦虑？感觉被困住了但不知道该不该走、往哪里走？通过20道深度诊断题，基于155万人验证过的职业决策模型，精准判断你该换赛道、换方法、换活法、坚持深耕还是双线发展。你需要的不是更多鸡汤，而是一个清晰的行动方向。", "keywords": "职业规划,换工作,转行,职业决策,职业测试,人生选择,副业,职场焦虑,小红书爆款测试", "primaryColor": "#c0392b", "ogImage": ""}, "home": {"title": "你该换工作，还是换活法？", "subtitle": "5种职业决策方向，帮你看清下一步到底该怎么走", "introHTML": "<p>你是不是也经常这样：周日晚上想到周一要上班，心里一阵发沉；打开招聘软件刷了半天，又默默地关掉了；感觉现在的工作不对劲，但说不清是该换方向、换公司，还是干脆换一种活法？</p><p>你不是一个人。超过<strong>155万</strong>人看过这篇职业决策模型，因为它回答了一个人人都问的问题：<strong>我现在到底该怎么办？</strong></p><p>20道深度诊断题，从职业满意度、成长空间、生活平衡和未来愿景四个维度，帮你精准判断自己属于5种类型中的哪一种——是<strong>换赛道</strong>彻底转行、<strong>换方法</strong>优化环境、<strong>换活法</strong>重新设计人生、<strong>坚持深耕</strong>等待突破，还是<strong>双线发展</strong>稳中求进。不需要鸡汤，只需要一个清晰的行动方向。</p>", "btnText": "开始测试", "disclaimer": "本测试仅供娱乐和参考，职业决策涉及复杂因素，请结合个人实际情况综合考虑，重大决策建议咨询专业职业规划师。"}, "dimensions": [{"name": "职业满意度", "icon": "💼", "questionIds": [1, 2, 3, 4, 5]}, {"name": "成长空间", "icon": "📈", "questionIds": [6, 7, 8, 9, 10]}, {"name": "生活平衡", "icon": "⚖️", "questionIds": [11, 12, 13, 14, 15]}, {"name": "未来愿景", "icon": "🔭", "questionIds": [16, 17, 18, 19, 20]}], "questions": [{"id": 1, "text": "每周日的晚上，想到第二天要上班，你内心最真实的感受是什么？", "options": [{"key": "A", "text": "沉重、焦虑甚至生理性抗拒，感觉又要被消耗和折磨整整一周"}, {"key": "B", "text": "还行，主要是对某些具体的事或某个人感到烦躁，不是对工作本身"}, {"key": "C", "text": "有一种说不清的迷茫和空虚，感觉这份工作跟我的人生方向越来越远了"}, {"key": "D", "text": "虽然累但还算充实，我知道自己在积累，重要的突破就在前方不远处"}, {"key": "E", "text": "对主业没太大感觉，但对业余在做的兴趣项目充满期待，那才是我的希望所在"}]}, {"id": 2, "text": "对目前工作的核心内容本身，你最真实的感觉是？", "options": [{"key": "A", "text": "完全不感兴趣，甚至觉得这个行业或岗位就没有任何一点让我兴奋的地方"}, {"key": "B", "text": "工作内容本身还行，但是公司文化、团队氛围、老板或流程让我非常难受"}, {"key": "C", "text": "说不上讨厌也说不上喜欢，但心里总觉得这不应该是自己干一辈子的事"}, {"key": "D", "text": "挺喜欢的，虽然也有枯燥和重复的部分，但整体上方向是对的、内容是有意义的"}, {"key": "E", "text": "主业内容不讨厌也不热爱，但我越来越清楚地知道，我的热情在另外一个方向"}]}, {"id": 3, "text": "最近半年，你在工作中获得过那种「哇，我做到了」的成就感吗？", "options": [{"key": "A", "text": "几乎没有，每天都在做重复的、看不到结果的事，越来越麻木"}, {"key": "B", "text": "偶尔有些小成就，但很快就被更大的无力感和挫折淹没了"}, {"key": "C", "text": "有成就感的瞬间越来越少，我开始认真怀疑是不是自己根本不适合这个行业"}, {"key": "D", "text": "有！虽然不是每天都有，但时不时能看到自己的进步和成果，这是支撑我的动力"}, {"key": "E", "text": "工作中成就感一般，但我在业余做的项目让我感到强烈的成就和兴奋"}]}, {"id": 4, "text": "你对自己目前所在行业的前景，最诚实的判断是？", "options": [{"key": "A", "text": "夕阳行业或者内卷到令人窒息，说实话我看不到任何向上的希望和空间"}, {"key": "B", "text": "行业本身还有前景，但我所在的公司或细分板块在走下坡路"}, {"key": "C", "text": "行业挺好的，在上升期，但我越来越不确定自己是不是想在这个行业里待到退休"}, {"key": "D", "text": "行业有起伏但长期我是看好的，我愿意跟着行业一起成长和迭代"}, {"key": "E", "text": "不管行业怎么样，我都想给自己开辟一个plan B的新可能性，不被一条路绑死"}]}, {"id": 5, "text": "如果有机会重新选一次，你还会选择现在这个职业方向吗？", "options": [{"key": "A", "text": "绝对不会。如果有重来的机会，我会坚定地选一个完全不同的方向"}, {"key": "B", "text": "大方向还行但方式要重选——我会选同一领域但更好的公司、更对味的团队"}, {"key": "C", "text": "可能会选完全不一样的东西，但说实话我现在也不知道自己到底想做什么"}, {"key": "D", "text": "大概率还会选这个方向，虽然路上有不少坎坷，但这确实是我真心喜欢和认可的"}, {"key": "E", "text": "会保留现在的工作作为安全网，但一定会更早、更坚决地开始发展自己的第二方向"}]}, {"id": 6, "text": "在目前的工作中，你感觉自己还在持续成长和进步吗？", "options": [{"key": "A", "text": "几乎停止了，每天都在吃老本、重复旧技能，感觉自己在慢慢贬值"}, {"key": "B", "text": "有些方面在成长，但速度太慢了，跟同龄人比明显在落后"}, {"key": "C", "text": "技能在成长没错，但我越来越不确定这些技能是不是我未来真正需要的"}, {"key": "D", "text": "一直在成长！虽然过程中很累但能清楚看到自己在往上走，能力边界在不断拓展"}, {"key": "E", "text": "主业成长空间有限，但我在业余时间疯狂学习和成长，未来的竞争力在那里"}]}, {"id": 7, "text": "如果未来两年你一直待在现在的岗位上不动，你的市场价值会怎么变化？", "options": [{"key": "A", "text": "会明显贬值，我当前的技能已经跟不上市场的变化和需求了"}, {"key": "B", "text": "可能持平或微微上升，但速度远远跟不上我自己对成长的野心和期待"}, {"key": "C", "text": "这个岗位的技能本身在升值，但我越来越害怕自己被彻底锁死在这一条路上"}, {"key": "D", "text": "会显著提升，我正在积累这个行业里最稀缺、最有含金量的核心能力和经验"}, {"key": "E", "text": "主业价值维持不变或小幅增长，但副业/第二方向的价值在这两年会大幅飙升"}]}, {"id": 8, "text": "你目前的直属领导或职场导师，能把你带到你真正想去的未来吗？", "options": [{"key": "A", "text": "我的领导自己都焦头烂额，完全给不了我任何方向上的指导和启发"}, {"key": "B", "text": "领导个人能力有限，或者公司的体制决定了天花板就在那里，再往上没空间了"}, {"key": "C", "text": "领导很厉害很成功，但我越来越不确定——我想成为他那样的人吗？"}, {"key": "D", "text": "我的领导/导师是我非常重要的成长资源，我能从他身上学到很多，他是我的重要加速器"}, {"key": "E", "text": "主业上的领导还不错，但我真正需要的导师和榜样在另外一个领域里面"}]}, {"id": 9, "text": "试着想象三到五年后自己的职业状态，你脑海中浮现出什么？", "options": [{"key": "A", "text": "一片模糊甚至有些焦虑，我完全看不到自己在这条路上的任何未来"}, {"key": "B", "text": "如果换到一个更好的平台，我能在同一个领域里走到一个更高的位置"}, {"key": "C", "text": "我隐约看到自己在做完全不一样的事情，但那个画面还不够清晰和确定"}, {"key": "D", "text": "我能非常清楚地看到自己在这个领域深耕到什么位置、成为什么样的人"}, {"key": "E", "text": "我看到的是两条并行的轨道——主业稳定提供安全感，副业蓬勃发展充满可能性"}]}, {"id": 10, "text": "关于学习新东西，你最近半年最真实的状态是什么？", "options": [{"key": "A", "text": "疲于应付日常工作，根本没有多余的时间和精力去学任何新东西"}, {"key": "B", "text": "在学，但学的内容跟现在的工作没什么关系，是在为可能的跳槽做准备"}, {"key": "C", "text": "什么都想学一点，但方向太多太杂，反而不知道到底应该从哪里深入入手"}, {"key": "D", "text": "有目标、有系统地学习，每一本书、每一门课都在为未来的质变扎扎实实地添砖加瓦"}, {"key": "E", "text": "主业需要的按部就班学，但大部分学习时间和热情都投在了自己真正热爱的方向"}]}, {"id": 11, "text": "目前的工作对你的身体健康，产生了什么实际的影响？", "options": [{"key": "A", "text": "严重影响——失眠、焦虑、脱发、颈椎腰椎问题，身体在发出明确的警告信号"}, {"key": "B", "text": "有些负面影响，主要是压力和久坐导致的，但我觉得换了环境应该能明显改善"}, {"key": "C", "text": "身体上还行没出什么大问题，但我的精神和情绪在慢慢枯萎，感觉在过别人的生活"}, {"key": "D", "text": "虽然工作强度不小但身体总体还行，我在主动管理和维护自己的健康和精力"}, {"key": "E", "text": "主业对健康的影响是可控的，我在利用业余时间积极锻炼和调节，整体状态还不错"}]}, {"id": 12, "text": "你的工作对你的家庭关系和个人生活，造成了多大的冲击？", "options": [{"key": "A", "text": "严重侵占，几乎没有时间陪家人、维持友谊，整个生活被工作吞噬殆尽"}, {"key": "B", "text": "有侵占但主要是因为目前这个公司或团队文化太卷，换一个环境会好很多"}, {"key": "C", "text": "工作时间本身还好，但它占据了我的大脑——下班后脑子还在转，无法真正放松"}, {"key": "D", "text": "偶尔加班但总体可控，我有意识地在保护自己的私人时间和重要关系"}, {"key": "E", "text": "主业时间还算规律和可控，我利用空余时间在认真地做着对自己有意义的事情"}]}, {"id": 13, "text": "你的工作和你的个人价值观之间，存在冲突吗？", "options": [{"key": "A", "text": "严重冲突！我在做我内心完全不认可的事情，每天都在大量精神内耗"}, {"key": "B", "text": "有些摩擦但主要是方式方法的问题，如果换一个价值观更契合的团队会好很多"}, {"key": "C", "text": "越来越冲突，以前觉得可以忍受和将就，但现在越来越难以说服自己了"}, {"key": "D", "text": "基本一致，我认可我正在做的事情的价值和意义，虽然不完美但大方向是对的"}, {"key": "E", "text": "主业在价值观层面没有太大冲突，但我内心真正的热情和使命在别的地方"}]}, {"id": 14, "text": "工作之外，你还有多少精力和心情去做自己真正喜欢的事？", "options": [{"key": "A", "text": "完全没有，下班后只想瘫着刷手机发呆，周末全部用来回血却永远回不满"}, {"key": "B", "text": "有一些但严重不够用，我想做的事情很多、想学的东西很多，但精力远远跟不上"}, {"key": "C", "text": "精力其实还有一些，但我把大部分用在了迷茫、焦虑和反复的内耗上了"}, {"key": "D", "text": "有！工作虽然充实但不会把我完全掏空，下班后我还有余力享受生活和兴趣爱好"}, {"key": "E", "text": "工作时间消耗不大，我把最充沛的、状态最好的精力留给了自己真正在乎的事情"}]}, {"id": 15, "text": "如果只能用一个词来形容你目前的工作和生活整体状态，会是哪个？", "options": [{"key": "A", "text": "「窒息」——感觉被套在一个越来越紧的袋子里，喘不过气来"}, {"key": "B", "text": "「卡住」——不是最差的情况但就是哪里不对劲，需要一个突破口"}, {"key": "C", "text": "「迷路」——我还在走，但越来越不知道脚下的这条路到底通向哪里"}, {"key": "D", "text": "「爬坡」——累是真的累，但我知道自己在往上走，山顶的风景值得所有的汗"}, {"key": "E", "text": "「并行」——两条线同时在推进，虽然忙碌但眼里有光、心中有希望"}]}, {"id": 16, "text": "你理想中五年后的工作和生活状态，最接近下面哪一种描述？", "options": [{"key": "A", "text": "在一个完全不同的行业和岗位上，做着让我每天有动力起床的事情"}, {"key": "B", "text": "在同一领域但明显更高的位置、更好的平台、更自主的环境和更大的scope"}, {"key": "C", "text": "工作和生活被整体重新设计过，不只是换了一份工作而是换了一种人生"}, {"key": "D", "text": "在这个领域做到了资深的专家或管理者位置，被行业认可，能力和回报对等"}, {"key": "E", "text": "主业稳定不折腾，而副业/第二方向已经成长为重要的收入来源和个人成就来源"}]}, {"id": 17, "text": "让你迟迟不敢对现状做出改变的最大障碍是什么？", "options": [{"key": "A", "text": "不知道到底该换什么方向，害怕从一个坑跳到另一个更深的坑"}, {"key": "B", "text": "经济压力——房贷车贷、家庭责任让我不敢轻易冒任何风险"}, {"key": "C", "text": "不只是钱的问题，而是我对「彻底改变人生轨迹」这件事本身感到深深的恐惧"}, {"key": "D", "text": "我觉得自己不需要改变方向，再坚持一下质变就会到来"}, {"key": "E", "text": "我不需要立刻all in做改变，现在这样双线并行的策略对我来说就是最稳的"}]}, {"id": 18, "text": "你到目前为止做过任何尝试来改变现状吗？结果怎么样？", "options": [{"key": "A", "text": "想过很多很多次但还不敢真正行动，每次一想到风险和各种不确定就退缩了"}, {"key": "B", "text": "已经更新了简历、看过一些外面的机会，但还没找到真正合适的下家"}, {"key": "C", "text": "尝试过一些副业或兴趣项目，但还没找到那个让我愿意全身心投入的方向"}, {"key": "D", "text": "我在当前岗位上主动做过沟通和调整，正在积极努力地改善和优化自己的现状"}, {"key": "E", "text": "已经在行动了！副业或第二方向已经有了初步的进展、成果甚至收入"}]}, {"id": 19, "text": "你跟身边最亲近的人聊过内心深处想要改变的想法吗？", "options": [{"key": "A", "text": "没有，怕被说「想太多」或者被认为不够成熟稳定，这些想法一直自己消化"}, {"key": "B", "text": "聊过，家人朋友表示支持我换一个环境，但他们建议我不要裸辞、要骑驴找马"}, {"key": "C", "text": "聊过但说实话没什么用，因为我自己都说不清楚自己到底想要什么"}, {"key": "D", "text": "聊过，身边的人能够理解我当前在这个阶段的积累过程，支持我继续坚持下去"}, {"key": "E", "text": "聊过！家人理解并支持我主业求稳、副业发展的双线并行策略，给了我不小的信心"}]}, {"id": 20, "text": "抛开所有现实的限制，你内心深处觉得自己最需要的是什么？", "options": [{"key": "A", "text": "彻底换一个行业或赛道，重新开始，哪怕从零做起我也心甘情愿"}, {"key": "B", "text": "换一个好得多的环境——更好的公司文化、更强的团队、更匹配的老板"}, {"key": "C", "text": "不只是换一份工作，而是先停下来给自己时间和空间，好好想清楚到底想过什么样的生活"}, {"key": "D", "text": "更多的耐心和更稳的心态，我的方向是对的，只需要继续咬紧牙关走下去"}, {"key": "E", "text": "不需要大破大立的剧烈改变，保持现状稳定的同时，坚定地把第二方向一步步走起来"}]}], "resultTypes": {"A": {"name": "换赛道型", "subtitle": "方向错了，停下来就是进步。是时候果断转向了", "maturityScore": 82, "indices": [{"label": "赛道偏离度", "value": 90}, {"label": "改变迫切度", "value": 92}, {"label": "重新出发勇气", "value": 80}], "diagnosis": "根据20道诊断题的综合分析，你最需要的是「换赛道」——不是微调或妥协，而是勇敢地换一个完全不同的行业或岗位。你对当前工作的核心内容、行业前景和个人价值观都产生了深度的怀疑和抵触。每周日晚上想到周一要上班时，那种胃里发沉的生理性焦虑不是矫情，而是你的身体在用它唯一会的方式诚实地告诉你：这条路已经不适合你了。你可能在一个正在萎缩的行业里苦苦挣扎，或者在做一份跟自己的天赋和热情完全错位的工作。继续耗下去，只会让你的职业价值持续贬值、心理状态不断恶化。但好消息是，意识到「必须换」本身就是改变最重要的一步。接下来的关键不是冲动裸辞，而是有策略地探索新的方向——做职业信息访谈、尝试做小项目验证、学习新领域的核心技能。换赛道从来不是逃跑或失败，而是一种清醒的止损和带着勇气的重新出发。你的经验和可迁移能力并没有归零，它们会在对的赛道上重新发光。", "radarData": [{"label": "职业满意度", "value": 15}, {"label": "成长空间", "value": 20}, {"label": "生活平衡", "value": 25}, {"label": "未来愿景", "value": 30}, {"label": "行动迫切度", "value": 95}], "suitableJobs": ["跨行业转型到高增长的新兴领域", "结合个人天赋和兴趣的全新职业方向", "需要重新学习但长期天花板更高的行业", "有明确成长路径的创业或自由职业"], "unsuitableJobs": ["继续在当前的行业和岗位上消耗自己", "仅仅换一家同类型的公司但方向不变", "在没有热情和意义的领域中继续将就"], "pathCompare": {"good": "顺应内心：勇敢地切断沉没成本，用策略性的方式探索和转换到真正适合你的新赛道。你的核心可迁移能力——学习能力、沟通能力、问题解决能力——并不会因为你换了行业就归零，它们在新土壤里会以你想象不到的方式重新开花。方向对了，慢也是快。", "bad": "继续拖延：因为「不知道换什么」或「害怕风险」而继续停在原地的每一天，都是在用自己最宝贵的时间为沉没成本买单。拖延越久，转行的心理和财务成本越高，而你的职业价值在当前的赛道上每一天都在悄悄地缩水。"}, "plan90": ["方向探索：花两周时间做3-5个职业信息访谈——去跟你感兴趣的新领域中真正在一线做的人聊一聊，了解日常工作的真实内容、入行的可行路径和真实的收入发展空间。不要只看招聘网站的描述。", "核心技能铺垫：选定新方向中最关键的一项硬技能，报名一个系统的课程或加入一个真实项目，用30天的时间完成从0到1的初步学习和掌握。用「做」来学，比光看书看视频有效十倍。", "小步验证和正式规划：在业余时间独立完成一个跟新方向相关的小项目或兼职任务，用真实的市场反馈来检验你的兴趣和能力是否真的匹配。如果验证通过，制定一份包含时间节点、财务储备和行动步骤的正式转型时间表。"], "closing": "及时止损从来不是失败，而是把有限的生命花在真正值得的人和事上面。方向对了，每一步都是前进。", "posterText": "换赛道型——方向错了，停下来就是进步", "posterSubtext": "我不怕从头开始，我怕的是十年后还在后悔当初没有勇气转身"}, "B": {"name": "换方法型", "subtitle": "你的方向没问题，问题出在打法——换战场，不换赛道", "maturityScore": 84, "indices": [{"label": "环境不适度", "value": 88}, {"label": "专业匹配度", "value": 85}, {"label": "升级跳潜力", "value": 82}], "diagnosis": "根据20道诊断题的综合分析，你不需要推翻重来的「换赛道」，但你非常需要「换方法」——你的职业大方向本身没有错，真正的问题集中在执行层面：公司的文化让你压抑、团队的氛围让你窒息、领导的风格让你无法发挥、或者你当前的定位和分工没有把你的核心优势放大出来。你喜欢这个行业和工作内容的内核，但被一个不适合的「壳」限制住了手脚。你不是要扔掉多年积累的专业经验和行业认知，而是急需找到一个能真正放大你价值的舞台。你的技能和市场经验是有价值的、有市场的，不应该因为一家公司或一个团队的问题就全盘否定自己走的路。接下来的战略重点很清晰：花精力认真研究这个行业里真正值得你去的公司和团队，利用你已有的专业积累和人脉，去做一次漂亮的「升级跳」而不是「大转向」。好的土壤能让同样的种子长出完全不同的姿态——你需要的只是一块更适合你的土地。", "radarData": [{"label": "职业满意度", "value": 45}, {"label": "成长空间", "value": 55}, {"label": "生活平衡", "value": 40}, {"label": "未来愿景", "value": 75}, {"label": "行动迫切度", "value": 85}], "suitableJobs": ["同一行业内更优质的公司和团队", "类似岗位但拥有更大权限和资源支持的位置", "同一领域但更聚焦核心业务的战略岗位", "行业内具有高成长潜力的创业公司或创新业务部门"], "unsuitableJobs": ["彻底转行放弃自己已有的专业积累和人脉", "继续待在当前这个持续消耗你而没有任何改善迹象的团队", "在没有成长空间和话语权的螺丝钉岗位上将就和妥协"], "pathCompare": {"good": "聪明升级：用你已经验证过的专业能力和行业认知作为筹码，主动选择一个更能发挥你价值的平台和环境。你做的是「同赛道升级跳」，你的经验不但不会清零，还会在新平台上被更好地放大和回报。这是ROI最高的改变方式。", "bad": "错误归因：因为当前环境的问题而误以为是整个行业或职业方向的问题，草率地彻底转行。这会让你白白扔掉宝贵的专业积累，在新领域从零开始，而新领域大概率也有它自己的问题和挑战。或者，因为害怕改变而继续在消耗你的环境中死撑，等待别人来改变。"}, "plan90": ["目标画像具体化：用一周时间，把理想中下一家公司的具体标准写下来——你想要的团队文化、项目类型、成长空间、薪资范围、地理位置和工作节奏。越具体越好，模糊的目标只会带来模糊的结果。", "市场探测和验证：认真更新你的简历和作品集，通过人脉内推或精准投递到3-5家你经过筛选的目标公司。把面试当作市场调研——在与不同公司的交流中测试市场对你的真实反馈和估值。", "策略性跳槽执行：基于面试反馈来优化你的定位和呈现方式，在至少拿到两个让你满意的offer之后再做最终决定。不要裸辞、不要在压力下接第一个offer。把这次跳槽当作一次经过精密计算的升级行动。"], "closing": "你在哪里跑步，比你在哪个跑道上更重要。换个更有养分的战场，同样的你可以跑出完全不同的速度。", "posterText": "换方法型——换战场，不换赛道", "posterSubtext": "我的方向是对的，我只是需要一片更适合我生长的土壤"}, "C": {"name": "换活法型", "subtitle": "你要的不是换一份工作，而是重新设计你的人生", "maturityScore": 86, "indices": [{"label": "人生迷茫度", "value": 90}, {"label": "深层反思力", "value": 88}, {"label": "重新设计意愿", "value": 85}], "diagnosis": "根据20道诊断题的综合分析，你需要的不只是换一份工作这么简单，你需要的是「换活法」——你对现状的不满足和不快乐已经超越了职业本身的层面，触及到了生活方式的根基。你可能在表面上拥有一份看起来还不错甚至让人羡慕的工作，但内心深处一直有一个挥之不去的声音在问：「难道我这一生就这样了吗？」你的迷茫和困扰不是技术性的——不是换个部门、换家公司、甚至换个行业就能自动消解的——而是你对整个人生的设计和走向产生了根本性的质疑。你需要的可能是一个能让你真正停下来思考和沉淀的gap期，或者一个从根基上重新设计的工作与生活模式。这不只是猎头和招聘网站能解决的问题，而是一次真正的人生设计课题：你希望每天用什么样的方式醒来？你希望把这一生最宝贵的时间和注意力花在什么上面？你希望十年后回头看的时候，拥有一个什么样的人生故事？给自己一点时间和空间去寻找这些深层问题的答案。有时候，勇敢地停下来，比一直在错误的方向上闷头奔跑，需要更多的智慧和更大的勇气。", "radarData": [{"label": "职业满意度", "value": 35}, {"label": "成长空间", "value": 40}, {"label": "生活平衡", "value": 30}, {"label": "未来愿景", "value": 25}, {"label": "行动迫切度", "value": 90}], "suitableJobs": ["为自己设计一个探索和沉淀的gap期", "尝试多种完全不同的工作和生活模式组合", "从全职固定的工作模式转变为自由职业或项目制", "进入一个跟个人核心价值观深度契合的全新领域"], "unsuitableJobs": ["为了安全感而急于跳到下一份同样不适合的工作", "在没解决根本问题的情况下继续麻木地硬撑", "因为恐惧而放弃对人生方式的认真审视和重新设计"], "pathCompare": {"good": "勇敢暂停：给自己设计一个结构化的探索期——不是为了逃避，而是为了更有觉知地找到答案。在这个期间，尝试不同的工作和生活组合、去接触完全不同圈层的人、做那些你一直想做但总说「没时间」的事。你需要的不是一个新工作，而是你人生的2.0版本。", "bad": "循环跳槽：只是因为受不了当前的状态就盲目地跳到下一份工作，而不去解决底层的方向性问题。你会发现新工作的新鲜感最多维持三到六个月，然后同样的迷茫和空虚会卷土重来——因为你只是换了一个泳池，却没有学会游泳。"}, "plan90": ["深度反思工作坊：给自己两周的「人生设计」时间——每天写30分钟日记，围绕三个核心问题不断深挖：什么事情让我真正感到快乐和投入？我天生擅长什么（不是后天训练出来的那种）？这个世界需要什么而我又能提供什么？三个圆圈的交集，就是你的方向。", "理想生活方式的微型实验：用一个月的时间，在现有条件允许的范围内，尝试接近你理想中的生活节奏——比如每天早起两小时做自己真正想做的事、周末去一个安静的地方独自思考和阅读、或者主动减少50%你发现其实根本不重要的社交活动。看看这种状态下的你，是什么样的。", "人生蓝图设计和第一步：基于前两个月的反思和实验结果，用一张纸画出三年后的理想生活全貌——包括工作内容、关系状态、身心健康、兴趣发展和经济模式。然后倒推回来，制定未来三个月最关键的几项具体行动，并立刻开始第一步。"], "closing": "人生最大的风险不是在错误的方向上走得慢，而是一直走得很快，却发现终点不是自己想去的地方。停下来，是一种更高级的前进。", "posterText": "换活法型——不只是换工作，而是重新设计人生", "posterSubtext": "我停下来，不是因为累了，而是想确认脚下的路是不是真的通向我想去的地方"}, "D": {"name": "坚持深耕型", "subtitle": "方向对了，剩下的交给时间和坚持。你的突破就在前面", "maturityScore": 88, "indices": [{"label": "方向正确度", "value": 92}, {"label": "积累深度", "value": 88}, {"label": "突破潜力", "value": 85}], "diagnosis": "根据20道诊断题的综合分析，你最需要的不是改变方向，而是「坚持深耕」——你当前所处的职业赛道是正确的，你喜欢自己的工作内容，你在持续积累这个行业里最稀缺、最有含金量的核心能力，你能清楚地看到自己在一步步地向上走。你现在感受到的疲惫和偶尔的动摇，更多来自于爬坡过程中完全正常的消耗和摩擦，而不是方向性的错误。很多时候，区分最终成功和遗憾放弃的，不是谁更聪明、谁资源更多，而仅仅是——谁在大多数人都选择放弃的那个最艰难的节点上，咬着牙多走了一步。你不需要被外界那些「不折腾就是不上进」「待太久了就该换了」的杂音所干扰。在一条正确的道路上持续不断地积累，是对自己职业生命最深的敬畏和最大的尊重。当然，「坚持」不等于盲目「死撑」。如果你的身体正在发出健康警告、你的核心关系正在被工作吞噬，请务必及时调整强度和节奏。但方向本身，请你相信自己最初的选择和一路走来的判断——山顶的风景，值得你这一路的爬坡和汗水。", "radarData": [{"label": "职业满意度", "value": 80}, {"label": "成长空间", "value": 85}, {"label": "生活平衡", "value": 65}, {"label": "未来愿景", "value": 90}, {"label": "行动迫切度", "value": 40}], "suitableJobs": ["在当前岗位上继续深入积累和拓展影响力", "主动争取更大的项目和更多的责任来加速成长", "寻找同领域的高级导师和进阶学习资源", "在合适的时机争取职位晋升或scope的显著扩大"], "unsuitableJobs": ["因为短期的困难和倦怠而轻易放弃已有的深厚积累", "被外界无意义的比较和噪音影响从而草率跟风转行", "在没有想清楚的情况下因为一时冲动而裸辞"], "pathCompare": {"good": "持续深耕：把你已经验证正确的方向坚持下去，同时有策略地加速——争取更大的项目、更复杂的挑战、更多曝光的机会。你的积累正在接近质变的临界点，这时候放弃是所有选择中成本最高的。优化节奏和方法，但不改方向。", "bad": "功亏一篑：在即将突破的前夜因为阶段性疲劳或外界诱惑而放弃。很多人在离山顶只差最后一百米的时候选择了下山，不是因为山太难爬，而是因为山下的声音太大——「换个山爬吧」「那山看起来更好」。而他们永远不会知道，山顶的风景有多值得。"}, "plan90": ["积累审计和短板识别：用一周时间，系统梳理你在这个领域已经积累的核心能力、重要项目经验和关键的行业人脉。诚实面对你目前最需要补齐的一块短板——然后把它作为你未来三个月的成长重点。", "主动加速计划：不要被动等待机会来敲门。主动向你的领导或关键决策者争取一个能让你突破当前舒适区的新项目、新责任或新角色。或者在你的工作圈子中主动找到一个值得你学习的导师或榜样，建立定期的交流和学习节奏。", "专业可见度建设：在行业里开始建立你的个人专业品牌和可见度——写一篇有深度的专业文章、在内部或行业会议上做一次有质量的分享、或者在团队内部发起一个有影响力的改进项目。让你的积累从「默默的」变成「被看见的」，为下一个阶段的突破做好铺垫。"], "closing": "太多人的遗憾不是因为没有天赋，而是放弃了太早。你已经在正确的路上了，再坚持一下，天亮就在下一个路口。", "posterText": "坚持深耕型——方向对了，剩下的交给时间", "posterSubtext": "我不需要换跑道，我只需要在正确的跑道上，跑到大多数人都放弃的地方"}, "E": {"name": "双线发展型", "subtitle": "两条腿走路，稳中求进。你的未来不只有一条轨道", "maturityScore": 85, "indices": [{"label": "双线平衡力", "value": 90}, {"label": "副业成长潜力", "value": 88}, {"label": "务实主义智慧", "value": 85}], "diagnosis": "根据20道诊断题的综合分析，你现在最需要和最合适的策略是「双线发展」——保持主业带来的稳定收入和基本职业安全感，同时在业余时间有策略、有节奏地构建你的第二发展曲线。你对当前的主业不算厌恶也不算热爱，它提供了一份尚可的收入和一个基本的安全网，但你内心深处非常清楚地知道，你的热情、你的好奇和你的长期未来，在另一个你还未全力投入的方向上。这是一个越来越被验证和推崇的务实策略：不冒险裸辞断掉口粮，但也绝不放弃去追逐自己真正想做的事情。双线发展不是「骑驴找马」的过渡性权宜之计，而是一种成熟的、可持续的现代职业发展模型——先用主业保障生存和生活品质，再用业余时间种下第二颗种子，浇水、施肥、等它长大，等到它足够强壮的那一天，你再决定是否把重心移过来。接下来的关键是把你的业余时间真正用好：不是漫无目的地东试一下西碰一下，而是像一个真正的创业者一样有目标、有计划、有纪律地推动你的第二方向从0到1再到更多。", "radarData": [{"label": "职业满意度", "value": 60}, {"label": "成长空间", "value": 65}, {"label": "生活平衡", "value": 75}, {"label": "未来愿景", "value": 80}, {"label": "行动迫切度", "value": 70}], "suitableJobs": ["保持当前稳定的主业同时系统性地发展副业", "寻找跟主业不冲突且能发挥个人兴趣的第二收入来源", "将已有的兴趣和技能逐步包装和转化为商业价值", "长期目标是副业成熟且收入稳定后拥有是否切换的主动选择权"], "unsuitableJobs": ["立刻裸辞放弃主业构建的安全网和稳定收入", "完全放弃对第二方向的持续探索和投入", "在没有副业基础和收入验证的情况下莽撞地全面转行"], "pathCompare": {"good": "双轨并行：像一个聪明的投资者一样管理你的职业生涯——用主业作为你的「低风险资产」，提供稳定现金流和基本保障；用副业/第二方向作为你的「高成长资产」，承担探索的风险同时享受成长的回报。当第二曲线成长到足够强壮，你就在人生中多了一个选项，而选项本身就是最大的自由。", "bad": "两头落空：要么因为主业的安逸而一直拖延、从未认真地推动第二方向，一年后回头看发现自己还在原地；要么因为太过急切而冲动裸辞，在没有收入支撑的情况下all in一个还未被验证的方向，让自己陷入巨大的经济和心理压力中。"}, "plan90": ["双线时间审计和优化：用第一周完整记录你目前主业和副业各自的时间投入，诚实地评估——你的精力分配是否合理？你的第二方向是否获得了足够且高质量的推进时间？砍掉那些既不生产价值也不带来快乐的「灰色时间消耗」。", "副业第一里程碑冲刺：为你的第二方向设定一个具体、可衡量的三个月里程碑——比如获得第一个愿意付费的客户、完成第一个最小可行产品原型、或者积累第一个1000个关注者。把这个目标拆解成每周必须完成的小任务，像对待工作deadline一样认真对待自己的副业deadline。", "切换条件设计和风险管理：制定一份清晰的「未来决策框架」——明确写下：当副业收入达到主业的百分之多少时你会考虑加大投入？当什么条件满足时你会考虑全面切换？你需要储备多少个月的应急生活费才能安心地做任何决策？把模糊的担忧变成精确的数字和条件。"], "closing": "不把所有鸡蛋放在一个篮子里，不是不信任哪个篮子，而是对自己的人生有更灵活、更从容的设计。两条腿走路的人，永远比一条腿的人走得更远。", "posterText": "双线发展型——两条腿走路，稳中求进", "posterSubtext": "我不用裸辞去追梦，我选择白天安稳、晚上追光，两条腿走更远的路"}}, "loadingMessages": ["正在深度诊断你的职业满意度……", "正在扫描你的成长空间和天花板……", "正在评估你的工作与生活平衡度……", "正在解码你对未来的真实愿景……", "正在匹配155万人的职业决策模型……", "正在生成你的专属行动方向报告……", "诊断完成，准备揭晓你的职业决策方向！"], "scoring": {"method": "frequency", "questionCount": 20, "mixedThreshold": 3, "scoreLabel": "匹配度"}, "mixedNotes": {"A+B": "换赛道与换方法的纠结——你可能既对行业方向有怀疑，又对当前的工作环境不满意。建议先做一个优先级判断：如果换一个更好的环境能不能让你对行业重新燃起热情？如果能，先换方法；如果不能，说明根源在赛道不在环境。", "A+C": "换赛道与换活法的深层共振——你不仅对职业方向产生怀疑，更对整体的生活方式感到迷失。这可能不只是职业规划的问题，而是一次人生的重新定位。在换赛道之前，建议先用一小段时间深入探索「我到底想要什么样的生活」这个更根本的问题。", "B+D": "换方法与坚持深耕的矛盾信号——你对当前环境有明确的不满，但内心深处又认可这个方向。这通常意味着你的问题集中在「执行层面」而非「战略层面」。不妨先尝试在当前环境中主动推动改变，如果三个月内没有任何改善，再启动策略性的跳槽计划。", "C+E": "换活法与双线发展的交叉思考——你想要更彻底的人生重新设计，但又不想完全放弃现有的安全感。这个组合其实非常明智：用主业保障生存的同时，用业余时间系统性地探索和实验你想要的「新活法」。不需要一步到位，把人生重新设计当作一个持续的过程而非一次性的决定。", "D+E": "坚持深耕与双线发展的互补策略——你认可当前的方向值得继续积累，但同时也想在旁边培育一个新的可能性。这是最稳健的职业策略组合：在既有赛道上继续深耕确保基本盘，同时在相邻或全新的领域播下第二颗种子。主业是现在，副业是未来，两者并不矛盾。"}};
+
+// ═══════════════════════════════════════
+// 通用测试引擎
+// ═══════════════════════════════════════
+(function(){
+const app = document.getElementById('app');
+let answers = {};           // { questionId: optionKey }
+let currentQuestion = 0;
+let currentRoute = '';
+let typewriterTimer = null;
+
+// ── 路由 ──────────────────────────────
+function navigate(route) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  currentRoute = route;
+  window.location.hash = route;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  const hash = window.location.hash.replace('#', '') || '/';
+  return hash;
+}
+
+// ── 渲染主入口 ────────────────────────
+function render() {
+  const route = getRoute();
+  currentRoute = route;
+
+  switch(route) {
+    case '/': renderHome(); break;
+    case '/quiz': renderQuiz(); break;
+    case '/loading': renderLoading(); break;
+    case '/result': renderResult(); break;
+    default: navigate('/'); break;
+  }
+}
+
+// ── 首页 ──────────────────────────────
+function renderHome() {
+  const h = CONFIG.home;
+  const dims = CONFIG.dimensions || [];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="home-header">
+        <h1>${h.title}</h1>
+        <p class="sub">${h.subtitle}</p>
+      </div>
+      <div class="home-intro">${h.introHTML || h.intro}</div>
+      ${dims.length ? `<div class="dim-grid">${dims.map(d =>
+        `<div class="dim-card"><span class="icon">${d.icon||'📊'}</span>${d.name}</div>`
+      ).join('')}</div>` : ''}
+      <button class="btn btn-primary" onclick="APP.start()">${h.btnText||'开始测试'}</button>
+      <p class="footer-note">${h.disclaimer||'本测试仅供娱乐参考，非科学评估。'}</p>
+      <p class="footer-code">${CONFIG.scoring.questionCount || CONFIG.questions.length} Questions · ${(CONFIG.dimensions||[]).length||1} Dimensions · 1 Diagnosis</p>
+    </div>`;
+}
+
+// ── 测试页 ────────────────────────────
+function renderQuiz() {
+  const questions = CONFIG.questions;
+  const dims = CONFIG.dimensions || [];
+  const total = questions.length;
+  const q = questions[currentQuestion];
+  const dim = dims.find(d => (d.questionIds||[]).includes(q.id));
+  const dimName = dim ? dim.name : '';
+  const progress = ((currentQuestion) / total * 100).toFixed(0);
+  const moduleLabel = dimName ? `${dimName}` : '';
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span class="quiz-module">${moduleLabel}</span>
+          <span class="quiz-progress">${currentQuestion + 1} / ${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="quiz-card">
+        <h3>${q.text}</h3>
+        ${q.options.map((opt, i) => `
+          <button class="opt-btn" onclick="APP.answer('${opt.key}')" id="opt-${i}">
+            <span class="opt-key">${opt.key}</span>${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <p class="quiz-hint">选择后自动进入下一题</p>
+    </div>`;
+}
+
+// ── 作答 ──────────────────────────────
+function answer(key) {
+  const q = CONFIG.questions[currentQuestion];
+  answers[q.id] = key;
+  currentQuestion++;
+
+  if (currentQuestion >= CONFIG.questions.length) {
+    navigate('/loading');
+  } else {
+    renderQuiz();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── 加载页（逐字打印） ────────────────
+function renderLoading() {
+  const msgs = CONFIG.loadingMessages || ['正在分析中……', '分析完成。'];
+  app.innerHTML = `
+    <div class="page active">
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="typewriter"></div>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('typewriter');
+  let msgIdx = 0;
+  let charIdx = 0;
+  let allDone = false;
+
+  function tick() {
+    if (allDone) return;
+    if (msgIdx >= msgs.length) {
+      el.classList.add('loading-done');
+      el.textContent = msgs[msgs.length - 1];
+      allDone = true;
+      setTimeout(() => navigate('/result'), 800);
+      return;
+    }
+    const msg = msgs[msgIdx];
+    if (charIdx <= msg.length) {
+      el.textContent = msg.slice(0, charIdx);
+      charIdx++;
+      typewriterTimer = setTimeout(tick, 60 + Math.random() * 40);
+    } else {
+      msgIdx++;
+      charIdx = 0;
+      typewriterTimer = setTimeout(tick, 400);
+    }
+  }
+  tick();
+}
+
+// ── 评分 ──────────────────────────────
+function calculateResult() {
+  const scoring = CONFIG.scoring || {};
+  const counts = {};
+  for (const key of Object.keys(CONFIG.resultTypes)) {
+    counts[key] = 0;
+  }
+  for (const ans of Object.values(answers)) {
+    if (counts[ans] !== undefined) counts[ans]++;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const primary = sorted[0][0];
+  const secondary = sorted.length > 1 && (sorted[0][1] - sorted[1][1]) <= (scoring.mixedThreshold || 3) && sorted[1][1] > 0
+    ? sorted[1][0] : null;
+
+  return { primary, secondary, counts, hasSecondary: !!secondary };
+}
+
+// ── 雷达图 SVG ────────────────────────
+function renderRadar(data, size = 260) {
+  const cx = size / 2, cy = size / 2, r = size * 0.35;
+  const n = data.length;
+  if (n < 3) return '<p style="text-align:center;color:var(--c-muted)">数据不足</p>';
+
+  const angleStep = (2 * Math.PI) / n;
+  const levels = 5;
+  let paths = '';
+
+  // 背景网格
+  for (let lv = 1; lv <= levels; lv++) {
+    const rr = r * (lv / levels);
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      pts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+    }
+    paths += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    paths += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+  }
+
+  // 数据多边形
+  let dataPts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    dataPts.push(`${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`);
+  }
+  paths += `<polygon points="${dataPts.join(' ')}" fill="var(--c-primary)" fill-opacity="0.2" stroke="var(--c-primary)" stroke-width="2"/>`;
+
+  // 数据点
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const val = Math.max(0, Math.min(100, data[i].value || 0)) / 100;
+    const rr = r * val;
+    paths += `<circle cx="${cx + rr * Math.cos(angle)}" cy="${cy + rr * Math.sin(angle)}" r="4" fill="var(--c-primary)"/>`;
+  }
+
+  // 标签
+  let labels = '';
+  for (let i = 0; i < n; i++) {
+    const angle = angleStep * i - Math.PI / 2;
+    const lr = r + 24;
+    const lx = cx + lr * Math.cos(angle);
+    const ly = cy + lr * Math.sin(angle);
+    const anchor = lx < cx - 10 ? 'end' : lx > cx + 10 ? 'start' : 'middle';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="var(--c-text)" font-weight="600">${data[i].label}</text>`;
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;
+}
+
+// ── 结果页 ────────────────────────────
+function renderResult() {
+  const result = calculateResult();
+  const rt = CONFIG.resultTypes[result.primary];
+  if (!rt) { navigate('/'); return; }
+
+  const secondaryRt = result.hasSecondary ? CONFIG.resultTypes[result.secondary] : null;
+  const typeName = secondaryRt ? `${rt.name} × ${secondaryRt.name}` : rt.name;
+  const subtitle = secondaryRt
+    ? `你同时具备${rt.name}和${secondaryRt.name}的特质，属于复合型人才`
+    : rt.subtitle;
+
+  // 混合型诊断
+  let mixedNote = '';
+  if (result.hasSecondary && CONFIG.mixedNotes) {
+    const key = `${result.primary}+${result.secondary}`;
+    const keyRev = `${result.secondary}+${result.primary}`;
+    mixedNote = CONFIG.mixedNotes[key] || CONFIG.mixedNotes[keyRev] || '';
+  }
+
+  const indices = rt.indices || [];
+  const radar = rt.radarData || [];
+  const jobs = rt.suitableJobs || [];
+  const noJobs = rt.unsuitableJobs || [];
+  const plan = rt.plan90 || [];
+  const pathC = rt.pathCompare || {};
+
+  app.innerHTML = `
+    <div class="page active">
+      <div class="result-header">
+        <div class="result-type">${typeName}</div>
+        <p class="result-subtitle">${subtitle}</p>
+        <div class="score-ring">${rt.maturityScore}</div>
+        <p class="score-label">${CONFIG.scoring.scoreLabel || '职业路径决策成熟度'}</p>
+      </div>
+
+      ${indices.length ? `
+      <div class="section">
+        <h3>📊 关键指数</h3>
+        <div class="indices-row">${indices.map(ix => `
+          <div class="index-item"><div class="index-val">${ix.value}</div><div class="index-label">${ix.label}</div></div>
+        `).join('')}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <h3>🔍 核心诊断</h3>
+        <div class="diagnosis-text">${rt.diagnosis}${mixedNote ? '\n\n' + mixedNote : ''}</div>
+      </div>
+
+      ${radar.length >= 3 ? `
+      <div class="section">
+        <h3>📡 能力雷达图</h3>
+        <div class="radar-wrap">${renderRadar(radar)}</div>
+      </div>` : ''}
+
+      ${jobs.length ? `
+      <div class="section">
+        <h3>🍚 适合的饭碗</h3>
+        <ul class="job-list">${jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${noJobs.length ? `
+      <div class="section">
+        <h3>⚠️ 不太适合的方向</h3>
+        <ul class="no-list">${noJobs.map(j => `<li>${j}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      ${(pathC.good || pathC.bad) ? `
+      <div class="section">
+        <h3>🔀 两条路径对比</h3>
+        <div class="compare-grid">
+          <div class="compare-card compare-good"><h4>✅ 顺应天赋</h4><p>${pathC.good||''}</p></div>
+          <div class="compare-card compare-bad"><h4>⚠️ 逆天赋而行</h4><p>${pathC.bad||''}</p></div>
+        </div>
+      </div>` : ''}
+
+      ${plan.length ? `
+      <div class="section">
+        <h3>📋 90天行动清单</h3>
+        <ul class="plan-steps">${plan.map((p,i) => `
+          <li><strong>第${i+1}步（第${i*30+1}-${(i+1)*30}天）</strong>：${p}</li>
+        `).join('')}</ul>
+      </div>` : ''}
+
+      <div class="section">
+        <p class="closing-text">${rt.closing||''}</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
+        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+      </div>
+    </div>`;
+
+  // 保存海报数据
+  window._posterData = { typeName, posterText: rt.posterText||rt.name, posterSubtext: rt.posterSubtext||rt.subtitle, meta: CONFIG.meta };
+}
+
+// ── 分享海报 ──────────────────────────
+function showPoster() {
+  const pd = window._posterData || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'poster-overlay show';
+  overlay.id = 'poster-overlay';
+  overlay.innerHTML = `
+    <div class="poster-card" id="poster-card">
+      <p style="font-size:.75rem;color:var(--c-muted);margin-bottom:8px">我的测试结果</p>
+      <div class="ptype">${pd.posterText||''}</div>
+      <p class="psub">${pd.posterSubtext||''}</p>
+      <div style="width:60px;height:3px;background:var(--c-primary);margin:16px auto;border-radius:2px"></div>
+      <p style="font-size:.75rem;color:var(--c-muted)">「${pd.meta?.title||''}」</p>
+      <div class="pfooter">扫码测测你的 →</div>
+    </div>
+    <p class="poster-close" onclick="this.parentElement.remove()">关闭</p>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+}
+
+// ── 重新开始 ──────────────────────────
+function restart() {
+  answers = {};
+  currentQuestion = 0;
+  sessionStorage.removeItem('quiz_answers');
+  navigate('/');
+}
+
+// ── 初始化 ────────────────────────────
+function init() {
+  // 尝试从 sessionStorage 恢复
+  const saved = sessionStorage.getItem('quiz_answers');
+  if (saved) {
+    try { answers = JSON.parse(saved); } catch(e) {}
+  }
+
+  window.addEventListener('hashchange', render);
+  render();
+}
+
+// ── 暴露 API ──────────────────────────
+window.APP = {
+  start: () => { answers = {}; currentQuestion = 0; navigate('/quiz'); },
+  answer: (key) => {
+    answer(key);
+    // 保存到 sessionStorage
+    sessionStorage.setItem('quiz_answers', JSON.stringify(answers));
+  },
+  restart,
+  showPoster,
+  navigate,
+};
+
+init();
+})();
+</script>
+</body>
+</html>
