@@ -461,7 +461,7 @@ function renderResult() {
 
       <div class="result-actions">
         <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
-        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+        <button class="btn btn-primary" onclick="showShare()">📤 分享结果</button>
       </div>
     </div>`;
 
@@ -556,14 +556,6 @@ function copyShareText() {
 document.getElementById('shareOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeShare();
 });
-// 把"分享结果"按钮绑定到showShare
-setTimeout(function() {
-  var btns = document.querySelectorAll('button');
-  for (var i = 0; i < btns.length; i++) {
-    if (btns[i].textContent.indexOf('分享') >= 0) {
-      btns[i].addEventListener('click', showShare);
-    }
-  }
 }, 1000);
 
 </script>
