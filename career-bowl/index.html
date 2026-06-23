@@ -128,6 +128,19 @@ body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-hei
 .poster-card .pfooter{font-size:.7rem;color:var(--c-muted);margin-top:20px;padding-top:14px;
   border-top:1px solid var(--c-border)}
 .poster-close{margin-top:16px;font-size:.8rem;color:var(--c-muted);cursor:pointer;text-align:center}
+
+.share-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center}
+.share-modal{background:#fff;border-radius:16px;padding:24px 20px 20px;width:85%;max-width:340px;box-shadow:0 8px 40px rgba(0,0,0,0.15)}
+.share-modal h3{text-align:center;font-size:18px;font-weight:700;margin-bottom:16px;color:#333}
+.share-preview{background:#f8f8f8;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#555;line-height:1.7;max-height:200px;overflow-y:auto;white-space:pre-wrap}
+.share-btns{display:flex;gap:12px}
+.share-btn{flex:1;padding:12px;border-radius:10px;font-size:15px;font-weight:600;text-align:center;cursor:pointer;border:none}
+.share-btn.copy{background:#2c3e50;color:#fff}
+.share-btn.copy:active{opacity:0.85}
+.share-btn.close{background:#fff;color:#333;border:1.5px solid #ddd}
+.share-btn.close:active{background:#f5f5f5}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#333;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:1000;pointer-events:none;transition:opacity 0.3s}
+
 </style>
 </head>
 <body>
@@ -511,6 +524,61 @@ window.APP = {
 
 init();
 })();
+
+function showShare() {
+  var resultType = CONFIG.resultTypes[topType];
+  var typeName = resultType.name || '';
+  var closing = resultType.closing || '';
+  var keyword = resultType.keyword || '';
+  var plan = resultType.plan90 || [];
+  
+  var text = '「测一测你天生适合吃哪碗饭」\n\n';
+  text += '我的结果：' + typeName + '\n';
+  if (keyword) text += '关键词：' + keyword + '\n\n';
+  if (closing) text += closing + '\n\n';
+  text += '你也来测测？\n' + location.href;
+  
+  document.getElementById('shareText').textContent = text;
+  document.getElementById('shareOverlay').style.display = 'flex';
+}
+function closeShare() {
+  document.getElementById('shareOverlay').style.display = 'none';
+}
+function copyShareText() {
+  var text = document.getElementById('shareText').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(function() { toast.style.opacity = '0'; }, 1500);
+  });
+}
+// 点击遮罩关闭
+document.getElementById('shareOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeShare();
+});
+// 把"分享结果"按钮绑定到showShare
+setTimeout(function() {
+  var btns = document.querySelectorAll('button');
+  for (var i = 0; i < btns.length; i++) {
+    if (btns[i].textContent.indexOf('分享') >= 0) {
+      btns[i].addEventListener('click', showShare);
+    }
+  }
+}, 1000);
+
 </script>
+
+<div class="share-overlay" id="shareOverlay" style="display:none">
+  <div class="share-modal">
+    <h3>📤 分享你的结果</h3>
+    <div class="share-preview" id="shareText"></div>
+    <div class="share-btns">
+      <button class="share-btn copy" onclick="copyShareText()">📋 复制文案</button>
+      <button class="share-btn close" onclick="closeShare()">关闭</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" style="opacity:0">已复制到剪贴板</div>
+
 </body>
 </html>
