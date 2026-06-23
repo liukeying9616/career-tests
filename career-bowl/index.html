@@ -140,6 +140,16 @@ body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-hei
 .rsk-v{font-size:.75rem;font-weight:700;width:35px;text-align:right}
 .act-kw{text-align:center;font-size:2rem;font-weight:800;color:var(--c-primary);padding:12px 0 8px}
 
+
+.share-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center}
+.share-modal{background:#fff;border-radius:16px;padding:24px 20px;width:85%;max-width:340px;box-shadow:0 8px 40px rgba(0,0,0,0.15)}
+.share-modal h3{text-align:center;font-size:18px;font-weight:700;margin-bottom:16px;color:#333}
+.share-preview{background:#f8f8f8;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#555;line-height:1.7;max-height:200px;overflow-y:auto;white-space:pre-wrap}
+.share-btns{display:flex;gap:12px}
+.share-btn{flex:1;padding:12px;border-radius:10px;font-size:15px;font-weight:600;text-align:center;cursor:pointer;border:none}
+.share-btn.copy{background:#2c3e50;color:#fff}.share-btn.copy:active{opacity:.85}
+.share-btn.close{background:#fff;color:#333;border:1.5px solid #ddd}.share-btn.close:active{background:#f5f5f5}
+
 </style>
 </head>
 <body>
@@ -475,7 +485,7 @@ function renderResult() {
 
 <div class="result-actions">
         <button class="btn btn-outline" onclick="APP.restart()">重新测试</button>
-        <button class="btn btn-primary" onclick="APP.showPoster()">📤 分享结果</button>
+        <button class="btn btn-primary" onclick="showShare()">📤 分享结果</button>
       </div>
     </div>`;
 
@@ -538,6 +548,19 @@ window.APP = {
 
 init();
 })();
+
+function showShare(){var rt=CONFIG.resultTypes[topType];var t='「测一测你天生适合吃哪碗饭」\n\n我的结果：'+rt.name+'\n';if(rt.keyword)t+='关键词：'+rt.keyword+'\n\n';t+=rt.closing+'\n\n你也来测测？\n'+location.href;document.getElementById('shareText').textContent=t;document.getElementById('shareOverlay').style.display='flex'}
+function copyShareText(){var t=document.getElementById('shareText').textContent;navigator.clipboard.writeText(t).then(function(){var toast=document.createElement('div');toast.textContent='✅ 已复制到剪贴板';toast.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#333;color:#fff;padding:12px 24px;border-radius:8px;z-index:1000';document.body.appendChild(toast);setTimeout(function(){toast.remove()},1500)})}
+
 </script>
+
+<div class="share-overlay" id="shareOverlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+<div class="share-modal"><h3>📤 分享你的结果</h3>
+<div class="share-preview" id="shareText"></div>
+<div class="share-btns">
+<button class="share-btn copy" onclick="copyShareText()">📋 复制文案</button>
+<button class="share-btn close" onclick="document.getElementById('shareOverlay').style.display='none'">关闭</button>
+</div></div></div>
+
 </body>
 </html>
